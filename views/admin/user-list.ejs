@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<%- include ('partials/head') %>
+<body class="app sidebar-mini ltr ">
+    <!-- PAGE -->
+    <div class="page">
+        <div class="page-main">
+        <!-- app-Header -->
+        <%- include ('partials/header') %>
+        <!-- /app-Header -->
+        <!--APP-SIDEBAR-->
+        <%- include ('partials/sidebar') %>
+            <!--app-content open-->
+            <div class="main-content app-content mt-0">
+                <div class="side-app">
+                    <!-- CONTAINER -->
+                    <div class="main-container container-fluid">
+                        <!-- PAGE-HEADER -->
+                        <div class="page-header">
+                            <h1 class="page-title"><%= pageTitle %></h1>
+                            <div>
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="/ap/home">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page"><%= pageTitle %></li>
+                                </ol>
+                            </div>
+                        </div>
+                        <!-- PAGE-HEADER END -->
+                        <!-- ROW-2 -->
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-3"><%= pageTitle %> List</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="table1" class="table table-bordered" width="100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>Register at</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>Register at</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ROW-2 END -->
+                    </div>
+                    <!-- CONTAINER END -->
+                </div>
+            </div>
+        </div>
+        <!-- FOOTER -->
+        <%- include ('partials/footer') %>
+        <!-- FOOTER END -->
+    </div>
+<!-- BACK-TO-TOP -->
+<a href="#top" id="back-to-top">
+    <i class="fa fa-angle-up"></i>
+</a>
+<%- include ('partials/footer-script') %>
+<script>
+    const actionUrl = "<%=actionUrl%>";
+        $(document).ready(function() {
+            let table = $('#table1').DataTable({
+                searching    : false,
+                "paging"        : true,
+                "responsive"    : true,
+                "select"        : true,
+                "order"         : [[ 0, 'desc' ]],
+                "pageLength"    : 10,
+                "processing"    : true,
+                "serverSide"    : true,
+                "ajax": {
+                    "url": `${actionUrl}/list`,
+                    "type": "POST",
+                    "data": function () {}
+                },
+                "columnDefs": [
+                    {
+                        "searchable": true,
+                        "orderable": false,
+                        "defaultContent": "-",
+                        "targets": "_all"
+                    }
+                ],
+                "dom": 'Bfrtip',
+            });//..... end of dataTables.
+        })
+</script>
+</body>
+</html>

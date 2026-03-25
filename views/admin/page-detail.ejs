@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+    <%- include ('partials/head') %>
+    <body class="app sidebar-mini ltr">
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+                <!-- app-Header -->
+                <%- include ('partials/header') %>
+                <!-- /app-Header -->
+
+                <!--APP-SIDEBAR-->
+                <%- include ('partials/sidebar') %>
+
+                <!--app-content open-->
+                <div class="main-content app-content mt-0">
+                        <div class="side-app">
+                        <!-- CONTAINER -->
+                        <div class="main-container container-fluid">
+
+                            <!-- PAGE-HEADER -->
+                            <div class="page-header">
+                                <h1 class="page-title">Page: <%= pageTitle %></h1>
+                                <div>
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item">
+                                            <a href="/ap/home">Home</a>
+                                        </li>
+                                        <li class="breadcrumb-item">
+                                            <a href="/ap/page/list">Pages</a>
+                                        </li>
+                                        <li class="breadcrumb-item active" aria-current="page"><%= pageTitle %></li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <!-- PAGE-HEADER END -->
+                            <!-- ROW 1 -->
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="col-xl-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row row-sm">
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div class="row">
+                                                            <div class="col-xl-12">
+                                                                <img src="/<%= result.image_url %>" alt="img" class="br-5 w-100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="details col-lg-12 col-md-12 mt-4 mt-xl-0">
+                                                        <div class="mt-2 mb-4">
+                                                            <h3 class="mb-3 fw-semibold text-center"><%= result.title %></h3>
+                                                            <hr>
+                                                            <div class="mt-2 text-center">
+                                                                <span class="fw-bold me-2 text-muted">Slug:</span><code><%= result.slug %></code> 
+                                                                <span class="fw-bold me-2 text-muted">Type:</span><code><%= result.type %></code> 
+                                                            </div>
+                                                            <h4 class="mt-2 text-muted"><b> Description</b></h4>
+                                                            <p><%- result.description %></p>
+                                                            <div class="col-md-12">
+                                                                <div class="form-group text-center">
+                                                                    <a href="/ap/page/list" class="btn btn-sm btn-outline-info"> <i class="fa fa-list"></i> Back to List</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ROW-2 END -->
+                            </div>
+                            <!-- CONTAINER END -->
+                        </div>
+                    </div>
+                    <!--app-content close-->
+                </div>
+                <!-- FOOTER -->
+                <%- include ('partials/footer') %>
+                <!-- FOOTER END -->
+            </div>
+            <!-- BACK-TO-TOP -->
+            <a href="#top" id="back-to-top">
+                <i class="fa fa-angle-up"></i>
+            </a>
+        <%- include ('partials/footer-script') %>
+    </body>
+</html>

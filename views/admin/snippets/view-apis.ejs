@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+    <!-- META DATA -->
+    <meta charset="UTF-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Next Generation Circle Pvt. Ltd., Peshawar, Khyber Pakhtunkhwa, Pakistan">
+    <meta name="author" content="NGEN Private Limited">
+    <meta name="keywords" content="ngen, ngc, kptourism, paktourism, pakistan, pak">
+    <!-- FAVICON -->
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon/favicon-16x16.png" />
+    <!-- TITLE -->
+    <title>KPCTA | APIs List</title>
+    <!-- BOOTSTRAP CSS -->
+    <link id="style" href="/admin/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- STYLE CSS -->
+    <link href="/admin/assets/css/style.css" rel="stylesheet" />
+    <link href="/admin/assets/css/dark-style.css" rel="stylesheet" />
+    <link href="/admin/assets/css/transparent-style.css" rel="stylesheet">
+    <!--- FONT-ICONS CSS -->
+    <link href="/admin/assets/css/icons.css" rel="stylesheet" />
+    <!-- COLOR SKIN CSS -->
+    <link id="theme" rel="stylesheet" type="text/css" media="all" href="/admin/assets/colors/color1.css" />
+</head>
+
+<body class="app ltr">
+    <div class="col-sm-12 col-md-12 mt-1">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">API's List for <%-type%>. Total <%-type%> API's have been created so far: <%= apiCounter %></h3>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">Sr#</th>
+                                <th style="width: 5%;">Method</th>
+                                <th style="width: 40%;">API</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% let sr1 = 1;
+                            if(success) {
+                                apisList.forEach((elem) => { %>
+                                    <tr>
+                                        <th colspan="4"><%= sr1 %>. <%= elem.type %></th>
+                                    </tr>
+                                    <% let sr2 = 1; elem.data.forEach((item) => { %>
+                                    <tr>
+                                        <td><%= sr1 %>.<%= sr2 %></td>
+                                        <td><code><%= item.method %></code></td>
+                                        <td>
+                                            <% if(item.method == 'get') { %>
+                                                <a href="<%=item.url%>" target="_blank">
+                                                    <code><%= protocol %><%= host %><%= item.url %></code>
+                                                </a>
+                                            <% } else { %>
+                                                <a class="post_method" href="javascript:void();">
+                                                    <code><%= protocol %><%= host %><%= item.url %></code>
+                                                </a>
+                                            <% } %>
+                                        </td>
+                                        <td><%- item.description %></td>
+                                    </tr>
+                                    <% sr2++; }) %>
+                                <% sr1++;}) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <h5>Which API's do you want to see:</h5>
+                                        <p><a href="/view/apis?type=web">Web API's</a> | <a href="/view/apis?type=mobile">Mobile API's</a></p>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th style="width: 5%;">Sr#</th>
+                                <th style="width: 5%;">Method</th>
+                                <th style="width: 40%;">API</th>
+                                <th>Description</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- COL END -->
+<%- include ('../partials/footer-script') %>
+    <script>
+        $(".post_method").on('click', function() {
+            $.growl.warning({
+                title: "Oops!",
+                message: "POST method is not opening in a browser.",
+                location: "tc",
+                size: "large"
+            });
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <%- include ('../partials/head') %>
+
+  <body class="app sidebar-mini ltr">
+    <!-- PAGE -->
+    <div class="page">
+      <div class="page-main">
+        <!-- app-Header -->
+        <%- include ('../partials/header') %>
+        <!-- /app-Header -->
+        <!--APP-SIDEBAR-->
+        <%- include ('../partials/sidebar') %>
+        <!--app-content open-->
+        <div class="main-content app-content mt-0">
+          <div class="side-app">
+            <!-- CONTAINER -->
+            <div class="main-container container-fluid">
+              <!-- PAGE-HEADER -->
+              <div class="page-header">
+                <h1 class="page-title"><%= pageTitle %></h1>
+                <div>
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="/ap/home">Home</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      <%= pageTitle %>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+              <!-- ROW-2 -->
+              <div class="row">
+                <div class="col-md-12 col-lg-12">
+                  <div class="card">
+                    <div
+                      class="card-header row justify-content-between align-items-center"
+                    >
+                      <div class="col">
+                        <h5 class="mb-3"><%= pageTitle %> List</h5>
+                      </div>
+                      <div class="col">
+                        <select
+                          class="form-control select2-show-search type-dropdown"
+                          data-placeholder="Select Type"
+                          id="filter_status"
+                          name="filter_status"
+                        >
+                          <option value="0" selected disabled>
+                            Check By Status
+                          </option>
+                          <option value="pending">Pending</option>
+                          <option value="process">Process</option>
+                          <option value="completed">Completed</option>
+                        </select>
+                      </div>
+                      <div class="col">
+                        <select
+                          class="form-control select2-show-search select2 type-dropdown"
+                          data-placeholder="Select Type"
+                          id="filter_car"
+                          name="filter_car"
+                        >
+                          <option value="0" selected>Select Cars</option>
+                          <% carsdata.forEach(car=> { %>
+                          <option value="<%= car.id %>" %>
+                            > <%= car.title %>
+                          </option>
+                          <% }) %>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table
+                          id="table1"
+                          class="table table-sm table-hover table-condensed"
+                          width="100%"
+                        >
+                          <thead>
+                            <tr>
+                              <th style="width: 1%">#</th>
+                              <th>Car</th>
+                              <th>Customer</th>
+                              <th>Contact#</th>
+                              <th>Email</th>
+                              <th>From</th>
+                              <th>To</th>
+                              <th>Pickup Time</th>
+                              <th>Pickup Date</th>
+                              <th>Ride Type</th>
+                              <th>Distance</th>
+                              <th>Price</th>
+                              <th>Total Cost</th>
+                              <th>Booking Status</th>
+                            </tr>
+                          </thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- ROW-2 END -->
+            </div>
+            <!-- CONTAINER END -->
+          </div>
+        </div>
+        <!--app-content close-->
+      </div>
+
+      <!-- FOOTER -->
+      <%- include ('../partials/footer') %>
+
+      <!-- FOOTER END -->
+    </div>
+
+    <!-- BACK-TO-TOP -->
+    <a href="#top" id="back-to-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+    <%- include ('../partials/footer-script') %>
+  </body>
+  <script>
+    const actionUrl = "<%=actionUrl%>";
+    $(function () {
+      let table = $("#table1").DataTable({
+        searching: false,
+        paging: true,
+        responsive: true,
+        select: true,
+        order: [[0, ""]],
+        pageLength: 30,
+        processing: true,
+        serverSide: true,
+        ajax: {
+          url: `${actionUrl}/list`,
+          type: "POST",
+          data: function (d) {
+            d.filter_status = $("#filter_status").val();
+            d.filter_car = $("#filter_car").val();
+          },
+        },
+        columnDefs: [
+          {
+            searchable: true,
+            orderable: false,
+            defaultContent: "-",
+            targets: "_all",
+          },
+        ],
+        dom: "Bfrtip",
+      }); //..... end of dataTables.
+
+      $(document).on("change keyup", ".type-dropdown", function () {
+        table.ajax.reload();
+      });
+
+      // Set time interval to fetch latest logs
+      setInterval(() => {
+        if ($("#auto_refresh_list").is(":checked")) {
+          table.ajax.reload();
+        }
+      }, 10000);
+      // auto fetch spinner
+      $(document).on("click", "#auto_refresh_list", function () {
+        if ($("#auto_refresh_list").is(":checked")) {
+          $("#auto_fetch_spinner").css("display", "block");
+        } else {
+          $("#auto_fetch_spinner").css("display", "none");
+        }
+      });
+    });
+
+    function updateBookingStatus(bookingId, selectElement) {
+      var status = selectElement.value;
+      $.ajax({
+        url: `${actionUrl}/update`,
+        method: "POST",
+        data: {
+          id: bookingId,
+          booking_status: status,
+        },
+        success: function (response) {
+          if (response && response.success) {
+            $.growl.notice1({
+              title: "Success",
+              message: response.message,
+            });
+            if (status === "completed") {
+              window.location.reload();
+            }
+          } else {
+            $.growl.error1({
+              title: "Error!",
+              message: response.message,
+            });
+          }
+        },
+        error: function (error) {
+          $.growl.error1({ title: "Error!", message: response.message });
+        },
+      });
+    }
+
+    // delete record hard
+    function deleteRecord(id, table) {
+      let table1 = $("#table1").DataTable();
+      swal(
+        {
+          title: "Are you sure?",
+          text: "You want to delete this permanently!",
+          type: "error",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, delete it!",
+          cancelButtonText: "Cancel",
+        },
+        function (result) {
+          if (result) {
+            $.ajax({
+              url: `/ap/general/delete/record`,
+              type: "POST",
+              data: {
+                id: id,
+                source_table: table,
+              },
+              success: function (response) {
+                if (response && response.success) {
+                  $.growl.notice1({
+                    title: "Success",
+                    message: response.message,
+                  });
+                  table1.draw();
+                } else {
+                  $.growl.error1({
+                    title: "Error!",
+                    message: response.message,
+                  });
+                }
+              },
+              error: function (xhr, errmsg, err) {
+                $.growl.error1({ title: "Error!", message: response.message });
+              },
+            });
+          }
+        }
+      );
+    }
+
+    // RESET FORM
+    $(".reset_form").click(async function () {
+      await resetForm();
+      // scroll top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // reset form
+    function resetForm() {}
+  </script>
+</html>

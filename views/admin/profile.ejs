@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<%- include ('partials/head') %>
+
+
+    <body class="app sidebar-mini ltr">
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+
+                <!-- app-Header -->
+                <%- include ('partials/header') %>
+
+                    <!-- /app-Header -->
+
+                    <!--APP-SIDEBAR-->
+                    <%- include ('partials/sidebar') %>
+
+
+                        <!--app-content open-->
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+
+                                <!-- CONTAINER -->
+                                <div class="main-container container-fluid">
+
+                                    <!-- PAGE-HEADER -->
+                                    <div class="page-header">
+                                        <h1 class="page-title"><%- pageTitle %></h1>
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item">
+                                                    <a href="/ap/home">Home</a>
+                                                </li>
+                                                <li class="breadcrumb-item active" aria-current="page"><%- pageTitle %>
+                                                </li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                    <!-- PAGE-HEADER END -->
+                                    <!-- ROW-1 OPEN -->
+                                    <div class="row">
+                                        <div class="col-xl-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Update Password</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="text-center chat-image mb-5">
+                                                        <div class="mb-3 ">
+                                                            <a class=""><img alt="avatar"
+                                                                    src="/<%= userData.profile_image%>"
+                                                                    class="avatar avatar-xl  profile-user brround cover-image"></a>
+                                                        </div>
+                                                        <div class="main-chat-msg-name">
+                                                            <a>
+                                                                <h5 class="mb-1 text-dark fw-semibold">
+                                                                    <%= userData.name%>
+                                                                </h5>
+                                                            </a>
+                                                            <p class="text-muted mt-0 mb-0 pt-0 fs-13"><b>Username :
+                                                                </b>
+                                                                <%= userData.username%>
+                                                            </p>
+                                                            <p class="text-muted mt-0 mb-0 pt-0 fs-13"><b>Registered :
+                                                                </b>
+                                                                <%= userData.createdAt %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <form id="editForm" method="post">
+                                                        <input type="hidden" name="url" id="url"
+                                                            value="<%=baseUrl%>/profile/update-profile-password">
+                                                        <input type="hidden" name="id" name="id"
+                                                            value="<%= userData.id%>">
+                                                        <div class="form-group">
+                                                            <label class="form-label">Old Password</label>
+                                                            <div class="wrap-input100 validate-input input-group"
+                                                                id="Password-toggle">
+                                                                <a href="javascript:void(0)"
+                                                                    class="input-group-text bg-white text-muted">
+                                                                    <i class="zmdi zmdi-eye text-muted"
+                                                                        aria-hidden="true"></i>
+                                                                </a>
+                                                                <input class="input100 form-control" type="password"
+                                                                    name="old_password" id="old_password"
+                                                                    placeholder="Old Password"
+                                                                    autocomplete="current-password">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="form-label">New Password</label>
+                                                            <div class="wrap-input100 validate-input input-group"
+                                                                id="Password-toggle">
+                                                                <a href="javascript:void(0)"
+                                                                    class="input-group-text bg-white text-muted">
+                                                                    <i class="zmdi zmdi-eye text-muted"
+                                                                        aria-hidden="true"></i>
+                                                                </a>
+                                                                <input class="input100 form-control" type="password"
+                                                                    name="password" id="password"
+                                                                    placeholder="New Password"
+                                                                    autocomplete="current-password">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="form-label">Confirm Password</label>
+                                                            <div class="wrap-input100 validate-input input-group"
+                                                                id="Password-toggle">
+                                                                <a href="javascript:void(0)"
+                                                                    class="input-group-text bg-white text-muted">
+                                                                    <i class="zmdi zmdi-eye text-muted"
+                                                                        aria-hidden="true"></i>
+                                                                </a>
+                                                                <input class="input100 form-control" type="password"
+                                                                    name="confirmpassword" id="confirmpassword"
+                                                                    placeholder="confirm Password"
+                                                                    autocomplete="current-password">
+                                                            </div>
+                                                            <div class="registrationFormAlert" style="color:red;"
+                                                                id="CheckPasswordMatch"></div>
+                                                        </div>
+                                                </div>
+
+                                                <div class="card-footer text-end">
+                                                    <button type="submit" class="btn btn-primary" type="submit"
+                                                        id="update">Update</button>
+
+                                                </div>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                        <!-- User Profile Edit-->
+
+                                        <div class="col-xl-8">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title">Update Profile</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form action="<%=baseUrl%>/profile/update-profile" method="post"
+                                                        enctype="multipart/form-data">
+                                                        <input type="hidden" name="id" id="id"
+                                                            value="<%= userData.id%>">
+                                                        <div class="row">
+                                                            <div class="col-lg-6 col-md-12">
+                                                                <div class="form-group">
+                                                                    <!-- Name -->
+                                                                    <label for="name">Name</label>
+                                                                    <input type="text" class="form-control" name="name"
+                                                                        id="name" placeholder="Enter Your Name"
+                                                                        value="<%=userData.name%>">
+                                                                </div>
+                                                            </div>
+                                                            <!-- Email -->
+                                                            <div class="form-group col-md-6">
+                                                                <label for="email">Email address</label>
+                                                                <input type="email" class="form-control" name="email"
+                                                                    id="email" placeholder="Email address"
+                                                                    value="<%=userData.email%>">
+                                                            </div>
+                                                            <!-- Contact -->
+                                                            <div class="form-group col-md-6">
+                                                                <label for="contact_no">Contact Number</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="contact_no" id="contact_no"
+                                                                    placeholder="Contact number"
+                                                                    value="<%=userData.mobile_no%>">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label for="gender">Gender</label>
+                                                                <div class="row">
+                                                                    <div class="form-group col-md-12">
+                                                                        <label class="form-control mt-2">
+                                                                            <input type="radio" name="gender"
+                                                                                id="gender" value="male" checked>
+                                                                                <span>Male</span>
+                                                                        </label>
+                                                                        <label class="form-control mt-2">
+                                                                            <input type="radio" name="gender"
+                                                                                id="gender" value="female"  <%if(userData.gender == "female") { %> checked <% } %>>
+                                                                                <span>Female</span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <!-- file  -->
+                                                        <div class="col-xl-6 col-md-6">
+                                                            <label for="mobile_logo_small">Profile Image</label>
+                                                            <input type="hidden" name="profile_image_edit"
+                                                                id="profile_image_edit"
+                                                                value="<%=userData.profile_image%>">
+                                                            <input type="file" class="dropify" data-bs-height="180"
+                                                                name="profile_image" id="profile_image" />
+                                                        </div>
+                                                </div>
+                                                <div class="card-footer text-end">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-outline-success">Update</button>
+                                                </div>
+                                                </form>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                    <!-- ROW-1 CLOSED -->
+                                </div>
+                            </div>
+                            <!--app-content close-->
+
+                        </div>
+
+
+                        <!-- FOOTER -->
+                        <%- include ('partials/footer') %>
+
+                            <!-- FOOTER END -->
+
+            </div>
+
+            <!-- BACK-TO-TOP -->
+            <a href="#top" id="back-to-top">
+                <i class="fa fa-angle-up"></i>
+            </a>
+
+            <%- include ('partials/footer-script') %>
+                <script>
+                    var element = document.getElementById('contact_no');
+                    var maskOptions = {
+                        mask: '0000-0000000'
+                    };
+                    var mask = IMask(element, maskOptions);
+                    function CheckPasswordMatch() {
+                        var password = $("#password").val();
+                        var confirmpassword = $("#confirmpassword").val();
+                        if (password != confirmpassword) {
+                            $("#CheckPasswordMatch").html("Password didn't match!");
+                            $("#CheckPasswordMatch").css({ "color": "red" });
+                        }
+                        else {
+                            $("#CheckPasswordMatch").html("Password match.");
+                            $("#CheckPasswordMatch").css({ "color": "green" });
+                        }
+                    }
+
+                    $(document).ready(function () {
+
+                        let userData = "<%= userData %>";
+                        console.log("ghgdfj", "<%= userData.profile_image %>")
+
+                        if (userData) {
+                            let iconImage = `<img src="/<%= userData.profile_image %>" id="profile_image">`;
+                            console.log(iconImage)
+                            $(".dropify-preview").css("display", "block");
+                            $(".dropify-loader").css("display", "none");
+                            $('.dropify-render').append(iconImage)
+                            $(".dropify-clear").css("display", "block");
+                            $(".dropify-wrapper").addClass("has-preview")
+                        }
+
+                        $("#confirmpassword").keyup(CheckPasswordMatch);
+                    });
+
+                    $(document).on("submit", "#editForm", async function (e) {
+                        e.preventDefault();
+                        let formData = new FormData();
+                        const old_password = $("#old_password").val();
+                        const password = $("#password").val();
+                        const confirmpassword = $("#confirmpassword").val();
+                        const id = $("#id").val();
+                        const url = $("#url").val();
+                        formData.append("old_password", old_password);
+                        formData.append("confirmpassword", confirmpassword);
+                        formData.append("password", password);
+                        formData.append("id", id);
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            processData: false,
+                            contentType: false,
+                            data: formData,
+                            success: async function (response) {
+                                if (response.success) {
+                                    $.growl.notice1({ title: "Success", message: response.message });
+                                    $("#old_password").val('');
+                                    $("#confirmpassword").val('');
+                                    $("#password").val('');
+                                } else {
+                                    $.growl.error1({ title: "Error!", message: response.message });
+                                }
+                                // scroll top
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                $.growl.error1({ title: "Error!", message: err + "." + errmsg });
+                            }
+                        })
+
+                    });
+
+
+
+                </script>
+
+    </body>
+
+</html>

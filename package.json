@@ -1,0 +1,49 @@
+{
+  "name": "admin-panel",
+  "version": "1.0.0",
+  "description": "Admin Panel developed in NodeJS, ExpressJS with ejs engine.",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha --reporter spec",
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "Imran Azim (imranazim99@gmail.com)",
+  "license": "ISC",
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "axios": "^0.27.2",
+    "bcryptjs": "^2.4.3",
+    "bluebird": "^3.7.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "express-fileupload": "^1.4.0",
+    "express-flash": "0.0.2",
+    "express-rate-limit": "^7.2.0",
+    "express-session": "^1.17.3",
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
+    "mysql2": "^2.3.3",
+    "node-cron": "^3.0.1",
+    "nodemon": "^3.1.7",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "pdfkit": "^0.13.0",
+    "qrcode": "^1.5.3",
+    "read-excel-file": "^5.6.1",
+    "sequelize": "^6.21.2",
+    "sharp": "^0.31.2",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0",
+    "sequelize-cli": "^6.5.2"
+  }
+}

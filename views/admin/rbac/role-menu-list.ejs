@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+    <%- include ('../partials/head') %>
+    <body class="app sidebar-mini ltr">
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+                <!-- app-Header -->
+                <%- include ('../partials/header') %>
+                <!-- /app-Header -->
+                <!--APP-SIDEBAR-->
+                <%- include ('../partials/sidebar') %>
+                <!--app-content open-->
+                    <div class="main-content app-content mt-0"> 
+                        <div class="side-app">
+                            <!-- CONTAINER -->
+                            <div class="main-container container-fluid">
+                                <!-- PAGE-HEADER -->
+                                <div class="page-header">
+                                    
+                                    <h1 class="page-title">
+                                        <%= pageTitle %> for <code><%=roleData.title%></code>
+                                    </h1>
+                                    <div>
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item">
+                                                <a href="/ap/home">Home</a>
+                                            </li>
+                                            <li class="breadcrumb-item">
+                                                <a href="/ap/rbac/roles">Roles List</a>
+                                            </li>
+                                            <li class="breadcrumb-item                                                                                                   active" aria-current="page">
+                                                <%= pageTitle %>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                <!-- PAGE-HEADER END -->
+                                <!-- ROW 1 -->
+                                <div class="row">
+                                    <!-- Col 1 -->
+                                    <div class="col-lg-6 col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">Menus Granted to Role <span class="badge rounded-pill bg-primary badge"><%=roleData.title%></span></h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table id="table1" class="table table-sm table-hover table-condensed mb-0" width="100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Menu</th>
+                                                                <th>Route</th>
+                                                                <th>Slug</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Menu</th>
+                                                                <th>Route</th>
+                                                                <th>Slug</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Col 2 -->
+                                    <div class="col-md-6 col-lg-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">Parent, Parent & Child and Other Menus List</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table id="table2" class="table table-sm table-hover table-condensed mb-0" width="100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Menu</th>
+                                                                <th>Route</th>
+                                                                <th>Slug</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody> 
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Menu</th>
+                                                                <th>Route</th>
+                                                                <th>Slug</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ROW 1 -->
+                            </div>
+                            <!-- CONTAINER END -->
+                        </div>
+                    </div>
+                    <!--app-content close-->
+                </div>
+
+            <!-- FOOTER -->
+            <%- include ('../partials/footer') %>
+
+            <!-- FOOTER END -->
+        </div>
+
+        <!-- BACK-TO-TOP -->
+        <a href="#top" id="back-to-top">
+            <i class="fa fa-angle-up"></i>
+        </a>
+        <%- include ('../partials/footer-script') %>
+    </body>
+   <script>
+    const actionUrl = "<%=actionUrl%>";
+    const roleId = "<%=roleData.id%>";
+    $(function () {
+        let table1 = $('#table1').DataTable({
+            "searching"  : false,
+            "paging"     : true,
+            "responsive" : true,
+            "select"     : true,
+            "order"      : [[ 0, '' ]],
+            "pageLength" : 50,
+            "processing" : true,
+            "serverSide" : true,
+            "ajax": {
+                "url": `${actionUrl}/list`,
+                "type": "POST",
+                "data": function (d) {
+                    d.role_id = roleId;
+                }
+            },
+            "columnDefs": [
+                {
+                    "searchable": true,
+                    "orderable": false,
+                    "defaultContent": "-",
+                    "targets": "_all"
+                }
+            ],
+            "dom": 'Bfrtip',
+        });//..... end of dataTables.
+        let table2 = $('#table2').DataTable({
+            "searching"  : false,
+            "paging"     : true,
+            "responsive" : true,
+            "select"     : true,
+            "order"      : [[ 0, '' ]],
+            "pageLength" : 50,
+            "processing" : true,
+            "serverSide" : true,
+            "ajax": {
+                "url": `${actionUrl}/menus/list`,
+                "type": "POST",
+                "data": function (d) {
+                    d.role_id = roleId;
+                }
+            },
+            "columnDefs": [
+                {
+                    "searchable": true,
+                    "orderable": false,
+                    "defaultContent": "-",
+                    "targets": "_all"
+                }
+            ],
+            "dom": 'Bfrtip',
+        });//..... end of dataTables.
+    })
+
+    function tableReload(){
+        let table1 = $('#table1').DataTable();
+        table1.draw();
+        let table2 = $('#table2').DataTable();
+        table2.draw();
+    }
+
+    // grant access
+    function grantAccess(id) {
+            swal({
+                title: "Are you sure?",
+                text: "You want to GRANT access!",
+                type: "warning",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Grant it!',
+                cancelButtonText: 'No',
+                showLoaderOnConfirm: true
+            }, function (result) {
+                if (result) {
+                    $.ajax({
+                        url: `${actionUrl}/grant/access`,
+                        type: 'POST',
+                        data: {
+                            role_id: roleId,
+                            menu_id: id
+                        },
+                        success: function (response) {
+                            if (response && response.success) {
+                                $.growl.notice1({title: "Success", message: response.message});
+                                tableReload();
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                            $.growl.error1({title: "Error!", message: response.message});
+                        }
+                    })
+                }
+            })
+        }
+        // remove access
+    function removeAccess(id) {
+        swal({
+            title: "Are you sure?",
+            text: "You want to REMOVE access!",
+            type: "warning",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Remove it!',
+            cancelButtonText: 'No'
+        }, function (result) {
+            if (result) {
+                $.ajax({
+                    url: `${actionUrl}/remove/access`,
+                    type: 'POST',
+                    data: {
+                        role_id: roleId,
+                        role_menu_id: id
+                    },
+                    success: function (response) {
+                        if (response && response.success) {
+                            $.growl.notice1({title: "Success", message: response.message});
+                            tableReload();
+                        } else {
+                            $.growl.error1({title: "Error!", message: response.message});
+                        }
+                    },
+                    error: function (xhr, errmsg, err) {
+                        $.growl.error1({title: "Error!", message: response.message});
+                    }
+                })
+            }
+        })
+    }
+
+   </script>
+</html>

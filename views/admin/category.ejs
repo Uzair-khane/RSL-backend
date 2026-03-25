@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+    <%- include ('partials/head') %>
+
+
+    <body
+        class="app sidebar-mini ltr">
+
+        <!-- PAGE -->
+        <div class="page">
+            <div
+                class="page-main">
+
+                <!-- app-Header -->
+                <%- include ('partials/header') %>
+
+                <!-- /app-Header -->
+
+                <!--APP-SIDEBAR-->
+                <%- include ('partials/sidebar') %>
+
+
+                <!--app-content open-->
+                    <div class="main-content app-content mt-0"> <div
+                        class="side-app">
+
+                        <!-- CONTAINER -->
+                        <div
+                            class="main-container container-fluid">
+                            <!-- PAGE-HEADER -->
+                            <div class="page-header">
+                                <h1 class="page-title">
+                                    <%= pageTitle %>
+                                    Category
+                                </h1> 
+                                <div>
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item">
+                                            <a href="/ap/home">Home</a>
+                                        </li>
+                                        <li class="breadcrumb-item active" aria-current="page"><%= pageTitle %> Categories</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <!-- PAGE-HEADER END -->
+                            <!-- ROW 1 -->
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="card" id="addRecordForm" style="display: block;">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Add Category</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <form class="needs-validation" enctype="multipart/form-data" id="addCategory" method="post">
+                                                <input type="hidden" id="url" name="url" value="<%= actionUrl%>/add">
+                                                <div class="form-row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="title">Title</label>
+                                                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter Tilte" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="icon">Icon</label>
+                                                        <input type="file" class="dropify" data-bs-height="180" name="icon" id="icon"/>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group pull-right">
+                                                            <button type="submit" class="btn btn-sm btn-outline-success" id="submit">Save</button>
+                                                            <button type="reset" class="btn btn-sm btn-outline-info reset_form">Reset</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- edit form  -->
+                                    <div class="card" id="editRecordForm" style="display: none;">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Update Category</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <form class="needs-validation" enctype="multipart/form-data" id="editCategory" method="post">
+                                                <input type="hidden" id="url_edit" name="url" value="<%= actionUrl%>/add">
+                                                <input type="hidden" name="edit_id" id="edit_id">
+                                                <input type="hidden" name="old_icon_path" id="old_icon_path">
+                                                <div class="form-row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="title_edit">Title</label>
+                                                        <input type="text" class="form-control" id="title_edit" name="title_edit" placeholder="Enter Tilte" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="icon_edit">Icon</label>
+                                                        <input type="file" class="dropify" data-bs-height="180" name="icon_edit" id="icon_edit"/>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group pull-right mt-3">
+                                                            <button type="submit" id="submitEdit" class="btn btn-sm btn-outline-success">Update</button>
+                                                            <button type="reset" class="btn btn-sm btn-outline-info reset_form">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ROW 1 -->
+                            <!-- ROW-2 -->
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><%= pageTitle %>
+                                                List</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table id="table1" class="table table-sm table-hover table-condensed mb-0" width="100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Title</th>
+                                                            <th style="width: 10%;">Status</th>
+                                                            <th style="width: 8%;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Title</th>
+                                                            <th style="width: 10%;">Status</th>
+                                                            <th style="width: 8%;">Action</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ROW-2 END -->
+                        </div>
+                        <!-- CONTAINER END -->
+                    </div>
+                </div>
+                <!--app-content close-->
+
+            </div>
+
+            <!-- FOOTER -->
+            <%- include ('partials/footer') %>
+
+            <!-- FOOTER END -->
+
+        </div>
+
+        <!-- BACK-TO-TOP -->
+        <a href="#top" id="back-to-top">
+            <i class="fa fa-angle-up"></i>
+        </a>
+
+        <%- include ('partials/footer-script') %>
+
+
+    </body>
+    <script>
+        const actionUrl = "<%=actionUrl%>";
+        const model = "<%=pageTitle%>";
+        const talbeTitle = "<%=talbeTitle%>"
+        $(function()  {
+            let table = $('#table1').DataTable({
+                "searching"  : false,
+                "paging"     : true,
+                "responsive" : true,
+                "select"     : true,
+                "order"      : [[ 0, '' ]],
+                "pageLength" : 10,
+                "processing" : true,
+                "serverSide" : true,
+                "ajax": {
+                    "url": `${actionUrl}?table=${talbeTitle}`,
+                    "type": "POST",
+                    "data": function () {}
+                },
+                "columnDefs": [
+                    {
+                        "searchable": true,
+                        "orderable": false,
+                        "defaultContent": "-",
+                        "targets": "_all"
+                    }
+                ],
+                "dom": 'Bfrtip',
+            });//..... end of dataTables.
+        })
+
+            // add new Category
+            $(document).on("submit", "#addCategory", async function (e) {
+                e.preventDefault();
+                var table1 = $('#table1').DataTable();
+
+                let formData = new FormData();
+                var fileToUpload = $('#icon').prop('files')[0];
+                const url = $("#url").val();
+                const category = $("#title").val();
+                await formData.append('title', category);
+                await formData.append('icon', fileToUpload);
+                if (formData != '') {
+                    submitBtnLoader('submit','show');
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: async function (response) {
+                            submitBtnLoader('submit','hide');
+                            if (response.success) {
+                                table1.draw()
+                                $.growl.notice1({title: "Success", message: response.message});
+                                await resetForm();
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                            submitBtnLoader('submit','hide');
+                            $.growl.error1({title: "Error!", message: err});
+                        }
+                    })
+                } else {
+                    $.growl.error1({title: "Error!", message: "Icon Required..!"});
+                }
+            });
+
+  // Update Category
+  $(document).on("submit", "#editCategory", async function (e) {
+                e.preventDefault();
+                var table1 = $('#table1').DataTable();
+
+                let formData = new FormData();
+                var fileToUpload = $('#icon_edit').prop('files')[0];
+                const url = $("#url_edit").val();
+                const category = $("#title_edit").val();
+                const id = $("#edit_id").val();
+                const old_icon_path = $("#old_icon_path").val();
+                await formData.append('title', category);
+                await formData.append('icon', fileToUpload);
+                await formData.append('id', id);
+                await formData.append('old_icon_path', old_icon_path);
+                if (formData != '') {
+                    submitBtnLoader('submitEdit','show');
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: async function (response) {
+                            submitBtnLoader('submitEdit','hide');
+                            if (response.success) {
+                                table1.draw()
+                                $.growl.notice1({title: "Success", message: response.message});
+                                await resetForm();
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                            submitBtnLoader('submitEdit','hide');
+                            $.growl.error1({title: "Error!", message: err});
+                        }
+                    })
+                } else {
+                    $.growl.error1({title: "Error!", message: "Icon Required..!"});
+                }
+            });
+
+        // RESET FORM
+        $(".reset_form").click(async function () {
+            await resetForm();
+        })
+
+        // reset form
+        function resetForm() {
+            $('#addCategory')[0].reset();
+            $('#editCategory')[0].reset();
+            $('#validationTooltip01').val('')
+            $('.dropify-render img').remove();
+            $(".dropify-preview").css("display", "none");
+            $(".dropify-clear").css("display", "none");
+            $(".dropify-loader").css("display", "none");
+            $(".dropify-message").css("display", "block")
+            $('#addRecordForm').css('display','block');
+            $('#editRecordForm').css('display','none');
+        }
+        // edit Record
+        function editRecord(id, table, action) {
+            $.ajax({
+                url: `/ap/general/edit/record`,
+                type: 'POST',
+                data: {
+                    id: id,
+                    source_table: table
+                },
+                success: function (response) {
+                    if (response && response.success) {
+                        console.log(response.data)
+                        let iconImage = `<img src="/${
+                            response.data.icon
+                        }" id="dropify-img">`
+                        $(".dropify-preview").css("display", "block");
+                        $(".dropify-loader").css("display", "none");
+                        $('.dropify-render').append(iconImage)
+                        $(".dropify-clear").css("display", "block");
+                        $(".dropify-wrapper").addClass("has-preview")
+                        $('#title_edit').val(response.data.title)
+                        $("#url_edit").val(actionUrl + '/update');
+                        $("#edit_id").val(id)
+                        $("#old_icon_path").val(response.data.icon);
+                        $('#addRecordForm').css('display','none');
+                        $('#editRecordForm').css('display','block');
+                        // scroll top
+                        window.scrollTo({top: 0, behavior: 'smooth'});
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    $.growl.error1({title: "Error!", message: err});
+                }
+            })
+        }
+
+        // delete record
+        function deleteRecord(id, table) {
+            swal({
+                title: "Are you sure?",
+                text: "You want to delete this!",
+                type: "error",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }, function (result) {
+                if (result) {
+                    $.ajax({
+                        url: `/ap/general/delete/record`,
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            source_table: table
+                        },
+                        success: function (response) {
+                            if (response && response.success) {
+                                var table1 = $('#table1').DataTable();
+                                table1.draw()
+                                $.growl.notice1({title: "Success", message: response.message});
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                            $.growl.error1({title: "Error!", message: response.message});
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+
+</html>

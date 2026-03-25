@@ -1,0 +1,45 @@
+<div class="row">
+    <div class="col-lg-12 col-md-12">
+        <div class="card" id="filterForm" style="display: block;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fe fe-filter"></i> Filter </h3>
+                <div class="card-options">
+                    <div class="btn-group">
+                        <button id="filter_reset_btn" type="button" class="btn btn-sm btn-default" title="Reset Filter">
+                            <i class="fa fa-refresh" aria-hidden="true"></i> Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- ADD FORM -->
+            <div class="card-body">
+                <form class="needs-validation" novalidate id="searchFormFilter" method="post">
+                    <div class="form-row">
+                        <div class="col-md-5">
+                            <label for="filter_user">Filter By User</label>
+                            <select class="form-control select2-show-search select2 activity_logs_filter" id="filter_user" name="filter_user">
+                                <option value="all" selected>Show All</option>
+                                <% userList.forEach(user => { %>
+                                    <option value="<%=user.id%>"><%=user.name%> | <%=user.username%></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filter_detail">Filter By Detail </label>
+                            <input type="text" class="form-control activity_logs_filter" name="filter_detail" id="filter_detail" placeholder="Search in detail text">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_action">Filter By Action</label>
+                            <select class="form-control select2-show-search select2 activity_logs_filter" id="filter_action" name="filter_action">
+                                <option value="all" selected>Show All</option>
+                                <% actionList.forEach(action => { %>
+                                    <option value="<%=action%>"><%=action%></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

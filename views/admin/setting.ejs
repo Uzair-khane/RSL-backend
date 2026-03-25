@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<%- include ('partials/head') %>
+
+<style>
+    header h1 {
+  font-size: 12pt;
+  color: #fff;
+  background-color: #1BA1E2;
+  padding: 20px;
+}
+
+article {
+  width: 80%;
+  margin: auto;
+  margin-top: 10px;
+}
+
+.thumbnail {
+  height: 100px;
+  margin: 10px;
+}
+</style>
+    <body class="app sidebar-mini ltr ">
+
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+
+                <!-- app-Header -->
+                <%- include ('partials/header') %>
+
+                    <!-- /app-Header -->
+
+                    <!--APP-SIDEBAR-->
+                    <%- include ('partials/sidebar') %>
+
+
+                        <!--app-content open-->
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+
+                                <!-- CONTAINER -->
+                                <div class="main-container container-fluid">
+
+                                    <!-- PAGE-HEADER -->
+                                    <div class="page-header">
+                                        <h1 class="page-title"><%- pageTitle %></h1>
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item">
+                                                    <a href="/ap/home">Home</a>
+                                                </li>
+                                                <li class="breadcrumb-item active" aria-current="page"><%- pageTitle %>
+                                                </li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                   
+                                    <!-- PAGE-HEADER END -->
+                                    <!-- ROW 1 -->
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title"><%- pageTitle %> <span class="badge rounded-pill bg-default badge">Last updated: <%=moment(result.updatedAt).fromNow()%></span></h3>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <form class="needs-validation"  method="post"
+                                                        action="<%=baseUrl%>/general-setting/update"
+                                                        enctype="multipart/form-data" novalidate>
+                                                        <input type="hidden" name="result_id" id="result_id"
+                                                            value="<%=result.id%>">
+                                                            <!-- Site Contents  -->
+
+                                                        <div class="form-row">
+                                                            <div class="col-xl-12 mb-2 mt-4">
+                                                                <h5>Site Contents: </h5>
+                                                            </div>
+                                                            <!-- site title -->
+                                                            <div class="col-xl-4 mb-3">
+                                                                <label for="organization_name">Organization Name <span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control"
+                                                                    placeholder="Enter  Organization Name"
+                                                                    value="<%=result.organization_name%>" name="organization_name"
+                                                                    id="organization_name" required>
+                                                                <!-- <input type="hidden" id="place" name="place"> -->
+                                                            </div>
+                                                            <!-- copyright text -->
+                                                            <div class="col-xl-8 mb-3">
+                                                                <label for="copyright_text">Footer Text <span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control"
+                                                                    placeholder="Enter Footer text "
+                                                                    value="<%=result.copyright_text%>" name="copyright_text"
+                                                                    id="copyright_text" required>
+                                                                <!-- <input type="hidden" id="place" name="place"> -->
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                             <!-- Contact Info -->
+                                                             <div class="form-row">
+                                                                <div class="col-xl-12 mb-2 mt-4">
+                                                                    <h5>Contact Info:</h5>
+                                                                </div>
+                                                                <!-- email 1 -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="email1">Primary Email <span class="text-danger">*</span></label>
+                                                                    <input type="email" class="form-control"
+                                                                        placeholder="Enter Email 1 "
+                                                                        value="<%= result.email1 %>" name="email1"
+                                                                        id="email1" required>
+                                                                </div>
+                                                                <!-- email 2 -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="email2">Email 2</label>
+                                                                    <input type="email" class="form-control"
+                                                                        placeholder="Enter Email 2 "
+                                                                        value="<%=result.email2%>" name="email2" id="email2"
+                                                                        >
+                                                                </div>
+                                                                <!-- Phone no  -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="contact_no">Contact # <span class="text-danger">*</span></label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter contact number "
+                                                                        value="<%=result.contact_no%>" name="contact_no"
+                                                                        id="contact_no" required>
+                                                                </div>
+                                                            </div>
+                                                            <hr>
+                                                            <!-- social Links -->
+                                                            <div class="form-row">
+                                                                <div class="col-xl-12 mb-2 mt-4">
+                                                                    <h5>Social Links:</h5>
+                                                                </div>
+                                                                <!-- Twitter Link -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="twitter_link">Twitter</label>
+                                                                    <input type="text" class="form-control" id="twitter_link"
+                                                                        name="twitter_link" value="<%=result.twitter_link%>"
+                                                                        placeholder="Enter Twitter Link" >
+                                                                </div>
+                                                                <!-- facebook  -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="facebook_link">Facebook</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter Facebook Link "
+                                                                        value="<%=result.facebook_link%>" name="facebook_link"
+                                                                        id="facebook_link">
+                                                                </div>
+                                                                <!-- youtube  -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="youtube_link">YouTube</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter YouTube Link "
+                                                                        value="<%=result.youtube_link%>" name="youtube_link"
+                                                                        id="youtube_link">
+                                                                </div>
+                                                                <!-- Instagram  -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="instagram_link">Instagram</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter Instagram Link "
+                                                                        value="<%=result.instagram_link%>" name="instagram_link"
+                                                                        id="instagram_link">
+                                                                </div>
+                                                            </div>
+                                                            <hr>
+                                                            <!-- Mobile App Links -->
+                                                            <div class="form-row">
+                                                                <div class="col-xl-12 mb-2 mt-4">
+                                                                    <h5>Mobile App Links:</h5>
+                                                                </div>
+                                                                <!-- Android App Link -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="andriod_app_link">Android App Link</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter andriod app link "
+                                                                        value="<%= result.andriod_app_link %>" name="andriod_app_link"
+                                                                        id="andriod_app_link">
+                                                                </div>
+                                                                <!-- IOS App Link -->
+                                                                <div class="col-xl-4 mb-3">
+                                                                    <label for="ios_app_link">iOS App Link</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter ios app link "
+                                                                        value="<%= result.ios_app_link %>" name="ios_app_link"
+                                                                        id="ios_app_link">
+                                                                </div>
+                                                            </div>
+                                                            <hr>
+                                                            <!-- Address  -->
+                                                            <div class="form-row">
+                                                                <div class="col-xl-12 mb-2 mt-4">
+                                                                    <h5>Location Address:</h5>
+                                                                </div>
+                                                                <!-- address 1 -->
+                                                                <div class="col-xl-6 mb-3">
+                                                                    <label for="address1">Primary Address <span class="text-danger">*</span></label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter Address1 "
+                                                                        value="<%=result.address1%>" name="address1"
+                                                                        id="address1" required>
+                                                                </div>
+                                                                <!-- address 2 -->
+                                                                <div class="col-xl-6 mb-3">
+                                                                    <label for="address2">Address2</label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Enter Address2 "
+                                                                        value="<%=result.address2%>" name="address2"
+                                                                        id="address2" >
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-row">
+                                                                <!-- Map Address  -->
+                                                                <div class="col-xl-12 mb-3">
+                                                                    <label for="map_address">Map Address<span class="text-danger">*</span></label>
+                                                                    <input type="text" class="form-control"
+                                                                        placeholder="Map Address" name="map_address"
+                                                                        value="<%=result.map_address%>" id="map_address"
+                                                                       required >
+                                                                </div>
+                                                            </div>
+                                                        <hr>
+                                                        <!-- Logo Setting  -->
+                                                        <div class="form-row">
+                                                            <div class="col-xl-12 mb-2 mt-4">
+                                                                <h5>Upload Logos:</h5>
+                                                            </div>
+                                                            <!-- light Logo -->
+                                                            <div class="col-xl-3 mb-3">
+                                                                <label for="logo_color">Light Logo</label>
+                                                                <input type="hidden" name="old_image1" id="old_image1"
+                                                                    value="<%=result.logo_color%>">
+                                                                <%
+                                                                    const logoColor = result.logo_color !== null ? '/'+result.logo_color:'';
+                                                                %>
+                                                                <input type="file" class="dropify" data-bs-height="180"
+                                                                    name="logo_color" data-default-file="<%=logoColor%>" id="logo_color" />
+                                                            </div>
+                                                            <!-- dark Logo -->
+                                                            <div class="col-xl-3 mb-3">
+                                                                <label for="logo_white">Dark logo</label>
+                                                                <input type="hidden" name="old_image2" id="old_image2"
+                                                                    value="<%=result.logo_white%>">
+                                                                    <%
+                                                                        const logoWhite = result.logo_white !== null ? '/'+result.logo_white:'';
+                                                                    %>
+                                                                <input type="file" class="dropify" data-bs-height="180"
+                                                                    name="logo_white" id="logo_white" data-default-file="<%=logoWhite%>" />
+                                                            </div>
+                                                            <!-- mobile small Logo -->
+                                                            <div class="col-xl-3 mb-3">
+                                                                <label for="mobile_logo_small">Mobile Small Logo</label>
+                                                                <input type="hidden" name="mobile_logo_small_edit" id="mobile_logo_small_edit"
+                                                                    value="<%=result.mobile_logo_small%>">
+                                                                <%
+                                                                    const mobileLogoSmall = result.mobile_logo_small !== null ? '/'+result.mobile_logo_small:'';
+                                                                %>
+                                                                <input type="file" class="dropify" data-bs-height="180" name="mobile_logo_small" id="mobile_logo_small" data-default-file="<%=mobileLogoSmall%>" />
+                                                            </div>
+                                                            <!-- mobile large Logo -->
+                                                            <div class="col-xl-3 mb-3">
+                                                                <label for="mobile_logo_large">Mobile Large Logo</label>
+                                                                <input type="hidden" name="mobile_logo_large_edit" id="mobile_logo_large_edit"
+                                                                    value="<%=result.mobile_logo_large%>">
+                                                                <%
+                                                                    const mobileLogoLarge = result.mobile_logo_large !== null ? '/'+result.mobile_logo_large:'';
+                                                                %>
+                                                                <input type="file" class="dropify" data-bs-height="180" name="mobile_logo_large" id="mobile_logo_large" data-default-file="<%=mobileLogoLarge%>" />
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                <div class="col-md-12">
+                                                    <div class="form-group pull-right">
+                                                        <button type="submit"
+                                                            class="btn btn-lg btn-outline-success">Update Settings</button>
+                                                    </div>
+                                                </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ROW 1 -->
+                            </div>
+                            <!-- ROW-2 END -->
+                        </div>
+                        <!-- CONTAINER END -->
+            </div>
+        </div>
+        <!--app-content close-->
+
+        </div>
+
+        <div class="modal" id="createfile">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content modal-content-demo">
+                    <form class="needs-validation" id="postData" method="post" novalidate>
+                        <input type="hidden" name="url" id="url" value="<%=baseUrl%>/general/add">
+                        <input type="hidden" name="title" id="title" value="<%= result.section1_text%>">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Add New Files</h6>
+                            <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <input id="images" type="file" name="files" accept="image/jpeg, image/png, text/html, application/zip, text/css, text/js" multiple>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn ripple btn-primary" type="submit">Add</button>
+                            <button class="btn ripple btn-danger" data-bs-dismiss="modal" type="button">cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <%- include ('partials/footer') %>
+
+    <!-- FOOTER END -->
+
+    </div>
+
+
+    
+    <!-- BACK-TO-TOP -->
+    <a href="#top" id="back-to-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
+
+    <%- include ('partials/footer-script') %>
+
+        <script>
+            var element = document.getElementById('contact_no');
+            var maskOptions = {
+                mask: '000-0000000'
+            };
+            var mask = IMask(element, maskOptions);
+            $(document).ready(function () { // add new District
+            $(document).on("submit", "#postData", async function (e) {
+                e.preventDefault();
+                let formData = new FormData();
+                const url = $("#url").val();
+                const title = $("#title").val();
+                formData.append("title", title)
+                // Read selected files
+                var fileToUpload = $('#images').prop("files");
+                for (var index = 0; index < fileToUpload.length; index++) {
+                    formData.append("images",fileToUpload[index]);
+                }
+
+                console.log(formData)
+                if (fileToUpload.length > 0) {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: async function (response) {
+                            if (response.success) {
+                                $.growl.notice1({title: "Success", message: response.message});
+                                
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                            $.growl.error1({title: "Error!", message: err});
+                        }
+                    })
+                } else {
+                    $.growl.error1({title: "Error!", message: "Select Atleast One Image..!"});
+                }
+            });
+
+        })
+
+        </script>
+    </body>
+
+</html>

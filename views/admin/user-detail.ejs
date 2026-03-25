@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<%- include ('partials/head') %>
+
+
+    <body class="app sidebar-mini ltr ">
+
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+
+                <!-- app-Header -->
+                <%- include ('partials/header') %>
+
+                    <!-- /app-Header -->
+
+                    <!--APP-SIDEBAR-->
+                    <%- include ('partials/sidebar') %>
+
+
+                        <!--app-content open-->
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+
+                                <!-- CONTAINER -->
+                                <div class="main-container container-fluid">
+
+                                    <!-- PAGE-HEADER -->
+                                    <div class="page-header">
+                                        <h1 class="page-title"><%= userData.name %> Profile</h1>
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item">
+                                                    <a href="/ap/home">Home</a>
+                                                </li>
+                                                <li class="breadcrumb-item">
+                                                    <a href="<%= actionUrl %>/list">Users List</a>
+                                                </li>
+                                                <li class="breadcrumb-item active" aria-current="page"><%= pageTitle %></li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <!-- PAGE-HEADER END -->
+                                    <!-- ROW 1 -->
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">User Profile</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="text-center chat-image mb-5">
+                                                                <div class="avatar avatar-xxl chat-profile mb-3 brround">
+                                                                    <img alt="avatar" src="<%= userData.profile_image %>" class="brround">
+                                                                </div>
+                                                                <div class="main-chat-msg-name">
+                                                                    <h3 class="mb-1 text-dark fw-semibold"><%= userData.name %>
+                                                                        </h3>
+                                                                    <p class="text-muted mt-0 mb-0 pt-0 fs-13"><%= userData.createdAt %></p>
+                                                                    <p>
+                                                                        <%if(userData.is_approved == 1){%>
+                                                                            <span class="badge rounded-pill bg-success badge-sm me-1 mb-1 mt-1">Active</span>
+                                                                        <% }else{%>
+                                                                            <span class="badge rounded-pill bg-danger badge-sm me-1 mb-1 mt-1">Un-verified / Pending</span>
+                                                                        <% } %>
+                                                                    </p>
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        Account Approval Status: 
+                                                                        <% if(userData.is_approved == 1){ %>
+                                                                            <button class="btn btn-danger px-3 " id="is_verified">Disable</button>
+                                                                        <% } else { %>
+                                                                            <button class="btn btn-success px-3 " id="is_verified">Approve</button>
+                                                                        <% } %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <ul class="list-group no-margin">
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-mail  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.email %></h5>
+                                                                </li>
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-phone  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.mobile_no %></h5>
+                                                                </li>
+                                                                <input type="hidden" id="id" name="id" value="<%=userData.id%>">
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-list  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.user_type %></h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <ul class="list-group no-margin">
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-user  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.gender %></h5>
+                                                                </li>
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-compass  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.city %></h5>
+                                                                </li>
+                                                                <li class="d-flex ps-3">
+                                                                    <div class="social social-profile-buttons me-2">
+                                                                        <a class="social-icon" href="javascript:void(0)"><i class="fe fe-map-pin  text-primary"></i></a>
+                                                                    </div>
+                                                                    <h5 class="my-auto"><%= userData.country %></h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- ROW 1 -->
+                                </div>
+                                <!-- ROW-2 END -->
+                            </div>
+                            <!-- CONTAINER END -->
+                        </div>
+            </div>
+            <!--app-content close-->
+
+        </div>
+
+        <!-- FOOTER -->
+        <%- include ('partials/footer') %>
+
+            <!-- FOOTER END -->
+
+            </div>
+            
+
+            <!-- BACK-TO-TOP -->
+            <a href="#top" id="back-to-top">
+                <i class="fa fa-angle-up"></i>
+            </a>
+
+            <%- include ('partials/footer-script') %>
+            <script>
+                const actionUrl = ("<%= actionUrl %>");
+                $('#is_verified').click(function() {
+                    id = $("#id").val();
+                    $.ajax({
+                        type: 'Get',
+                        url: `${actionUrl}/update/${id}`,
+                        success: async function (response) {
+                            if (response.success) {
+                                $.growl.notice1({title: "Success", message: response.message});
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                $.growl.error1({title: "Error!", message: response.message});
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                                    $.growl.error1({title: "Error!", message: err});
+                                }
+                            })
+                    
+                })
+            </script>
+
+
+    </body>
+
+</html>
+</body>
+
+</html>

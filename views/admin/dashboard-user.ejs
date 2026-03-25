@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+    <%- include ('partials/head') %>
+<style>
+    body { margin: 0; padding: 0; }
+</style>
+
+<body class="app sidebar-mini ltr">
+
+    <!-- PAGE -->
+    <div class="page">
+        <div class="page-main">
+
+            <!-- app-Header -->
+            <%- include ('partials/header') %>
+
+            <!-- /app-Header -->
+
+            <!--APP-SIDEBAR-->
+            <%- include ('partials/sidebar') %>
+
+
+            <!--app-content open-->
+            <div class="main-content app-content mt-0">
+                <div class="side-app">
+
+                    <!-- CONTAINER -->
+                    <div class="main-container container-fluid">
+
+                        <!-- PAGE-HEADER -->
+                        <div class="page-header">
+                            <h1 class="page-title">Dashboard <code class="text-success">Welcome: <%= currentUser.name %> | <%= currentUser.username %></code></h1>
+                            <div>
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                                </ol>
+                            </div>
+                        </div>
+                        <!-- PAGE-HEADER END -->
+
+                        <!-- ROW MAP -->
+                        <!-- <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Title</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- ./ROW MAP -->
+                    </div>
+                    <!-- CONTAINER END -->
+                </div>
+            </div>
+            <!--app-content close-->
+
+        </div>
+
+        <!-- FOOTER -->
+        <%- include ('partials/footer') %>
+
+        <!-- FOOTER END -->
+
+    </div>
+
+    <!-- BACK-TO-TOP -->
+    <a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
+
+    <%- include ('partials/footer-script') %>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<style>
+    .no-slide, .sub-category, .slide-item {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        padding: 5px;
+        margin: 5px 0;
+        border-bottom: 1px solid #ccc;
+    }
+</style>
+<div class="sticky">
+    <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
+    <div class="app-sidebar">
+        <div class="side-header">
+            <!-- LOGO -->
+            <a class="header-brand1" href="/ap/home">
+                <img src="/admin/images/logoside.png" class="header-brand-img desktop-logo" alt="logo">
+                <img src="/favicon/faviconr.jpg" class="header-brand-img toggle-logo" alt="logo">
+                <img src="/favicon/faviconr.jpg" class="header-brand-img light-logo" alt="logo">
+                <img src="/admin/images/logoside.png" class="header-brand-img light-logo1" alt="logo">
+            </a>
+            <!-- ./LOGO -->
+        </div>
+        <div class="main-sidemenu">
+            <div class="slide-left disabled" id="slide-left"><svg xmlns="http://www.w3.org/2000/svg"
+                    fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" />
+                </svg></div>
+            <ul class="side-menu">
+                <li class="sub-category">
+                    <h3>Main</h3>
+                </li>
+                <% userMenus.forEach(menu => { 
+                    const queryParam = menu.query_param != null && menu.query_param != '' ? '?'+menu.query_param:'';
+                    %>
+                    <% if(menu && menu.type == 'main-menu' && menu.route == 'home') { %>
+                        <li class="no-slide" id="<%=menu.id%>_menu">
+                            <a class="side-menu__item has-link" href="<%=baseUrl%>/<%=menu.route%>">
+                                <i class="side-menu__icon <%=menu.icon%>"></i>
+                                <span class="side-menu__label"><%=menu.title%></span>
+                            </a>
+                        </li>
+                    <% } %>
+                    <% if(menu.route == 'settings') { %>
+                        <li class="sub-category">
+                            <h3>General Settings</h3>
+                        </li>
+                    <% } %>
+                    <% if(menu.route == 'category') { %>
+                        <li class="sub-category">
+                            <h3>Categories</h3>
+                        </li>
+                    <% } %>
+                    <% if(menu && menu.type == 'sub-menu' && menu.parent_id == 0 && menu.submenus.length > 0) { %>
+                        <li class="slide" id="<%=menu.id%>_menu">
+                            <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0)"><i
+                                    class="side-menu__icon <%=menu.icon%>"></i><span
+                                    class="side-menu__label"><%=menu.title%></span><i
+                                    class="angle fe fe-chevron-right"></i></a>
+                            <ul class="slide-menu">
+                                <% menu.submenus.forEach(submenu => { 
+                                    const queryParamSub = submenu.query_param != null && submenu.query_param != '' ? '?'+submenu.query_param:'';
+                                    %>
+                                    <li><a href="<%=baseUrl%>/<%=submenu.route%>/<%=submenu.slug%><%=queryParamSub%>" class="slide-item"><%=submenu.title%></a></li>
+                                <% }) %>
+                            </ul>
+                        </li>
+                    <% } else if(menu && menu.type == 'main-menu' && menu.route != 'home' && menu.submenus.length == 0) { %>
+                    <% if(menu.route == 'district') { %>
+                        <li class="sub-category">
+                            <h3>Content</h3>
+                        </li>
+                    <% } %>
+                    <!-- District -->
+                    <li class="no-slide" id="<%=menu.id%>_menu">
+                        <a class="side-menu__item has-link" href="<%=baseUrl%>/<%=menu.route%>/<%=menu.slug%><%=queryParam%>" >
+                            <i class="side-menu__icon <%=menu.icon%>"></i>
+                            <span class="side-menu__label"><%=menu.title%></span>
+                        </a>
+                    </li>
+                <% } %>
+            <% }); %>
+            </ul>
+            <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191"
+                    width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z" />
+                </svg></div>
+        </div>
+    </div>
+    <!--/APP-SIDEBAR-->
+</div>

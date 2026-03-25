@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+    <!-- META DATA -->
+    <meta charset="UTF-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Next Generation Circle Pvt. Ltd., Peshawar, Khyber Pakhtunkhwa, Pakistan">
+    <meta name="author" content="NGEN Private Limited">
+    <meta name="keywords" content="ngen, ngc, pvt, ltd, kp, tourism, kptourism, paktourism, pakistan, pak">
+    <!-- FAVICON -->
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon/faviconr.jpg" />
+    <!-- TITLE -->
+    <title>ACP | Login</title>
+    <!-- BOOTSTRAP CSS -->
+    <link id="style" href="/admin/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- STYLE CSS -->
+    <link href="/admin/assets/css/style.css" rel="stylesheet" />
+    <link href="/admin/assets/css/dark-style.css" rel="stylesheet" />
+    <link href="/admin/assets/css/transparent-style.css" rel="stylesheet">
+    <!--- FONT-ICONS CSS -->
+    <link href="/admin/assets/css/icons.css" rel="stylesheet" />
+    <!-- COLOR SKIN CSS -->
+    <link id="theme" rel="stylesheet" type="text/css" media="all" href="/admin/assets/colors/color1.css" />
+</head>
+
+<body class="app ltr">
+
+    <!-- BACKGROUND-IMAGE -->
+    <!-- PAGE -->
+    <div class="page">
+        <!-- PAGE-CONTENT OPEN -->
+        <div class="text-center">
+            <a href="/ap/auth/login"><img src="/admin/images/logoside.png" class="header-brand-img login-logo" alt="No Image"></a>
+        </div>
+        <div class="container-login100">
+            <div class="wrap-login100 p-8 col-md-4">
+                <% if(errorFlash.length > 0){ %>
+                    <div class="alert alert-danger" role="alert"> 
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true">&times;</button>
+                        <strong>Oops!</strong> <p class="text-justify"><%- errorFlash %></p>
+                    </div>
+                <% } %>
+                <span id="is_network"></span>
+                <form class="login100-form validate-form" action="<%= actionUrl %>/login" method="post" id="login-form">
+                    <span class="login100-form-title pb-5">
+                        Admin Login
+                    </span>
+                    <div class="panel panel-primary">
+                        <div class="panel-body tabs-menu-body p-0 pt-5">
+                            <div class="wrap-input100 validate-input input-group"
+                                data-bs-validate="Valid email is required: ex@abc.xyz">
+                                <a href="javascript:void(0)" class="input-group-text bg-white text-muted">
+                                    <i class="zmdi zmdi-email text-muted" aria-hidden="true"></i>
+                                </a>
+                                <input class="input100 border-start-0 form-control ms-0" type="email"
+                                    placeholder="Email" name="username">
+                            </div>
+                            <div class="wrap-input100 validate-input input-group" id="Password-toggle">
+                                <a href="javascript:void(0)" class="input-group-text bg-white text-muted">
+                                    <i class="zmdi zmdi-eye text-muted" aria-hidden="true"></i>
+                                </a>
+                                <input class="input100 border-start-0 form-control ms-0" type="password"
+                                    placeholder="Password" name="password">
+                            </div>
+                            <div class=" pt-4">
+                                <p class="mb-0 text-muted ms-1">Forgot Password? Contact with your system administrator</p>
+                            </div>
+                            <div class="container-login100-form-btn">
+                                <button type="submit" class="login100-form-btn btn-primary" id="submitbtn">
+                                    Login
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- PAGE-CONTENT OPEN CLOSED -->
+    </div>
+    <!-- End PAGE -->
+    <!-- BACKGROUND-IMAGE -->
+
+    <!-- JQUERY JS -->
+    <script src="/admin/assets/js/jquery.min.js"></script>
+    <!-- BOOTSTRAP JS -->
+    <script src="/admin/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/admin/assets/plugins/bootstrap/js/popper.min.js"></script>
+    <script src="/admin/assets/js/show-password.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- CUSTOM JS -->
+    <script src="/admin/assets/js/custom.js"></script>
+    <script>
+        let errorMsg = '<div class="alert alert-danger" role="alert" id="network_error"> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true">&times;</button> <strong>Oops!</strong> <p class="text-justify">Network error!</p></div>';
+        let appendDiv = $("#is_network");
+        const socket = io();
+        socket.on("connect", () => {
+            console.log('sid: ', socket.id)
+            appendDiv.empty()
+        })
+        socket.on("disconnect", (reason) => {
+            console.log(reason)
+            appendDiv.empty()
+            appendDiv.append(errorMsg)
+        });
+        // All New Users connected
+        socket.on('users', (users) => {
+            console.log(users)
+        })
+        $(document).ready(function() {
+            $("#login-form").submit(function (e) {
+                const submitBtn = $("#submitbtn");
+                submitBtn.attr({ type: "button", disabled: true });
+                const loaderHtml = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> <span class="p-2">Checking credentials...</span>';
+                submitBtn.html(loaderHtml);
+            })
+        })
+    </script>
+</body>
+
+</html>
