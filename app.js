@@ -13,6 +13,8 @@ var express = require("express"),
   apRouter = require("./routes/admin/routing"),
   siteApiRouter = require("./routes/site-api/v1/routing");
 // mobileApiRouter = require('./routes/mobile-api/routing');
+const sequelize = require("./config/dbconfig");
+require("./models");
 
 const RoleMenu = require("./models/role_menus");
 const Menu = require("./models/menu");
@@ -242,6 +244,15 @@ app.get("*", function (req, res) {
 
 // set the app to listen on the port
 const port = process.env.PORT || 5000;
-var server = httpServer.listen(port, () => {
-  console.log("Web Backend Server is running on port", server.address().port);
-});
+sequelize
+  .sync()
+  .then(() => {
+    console.log("Table created.");
+    var server = httpServer.listen(port, () => {
+      console.log("Web Backend Server is running on port", server.address().port);
+    });
+  })
+  .catch((err) => {
+    console.log("An error occured while creating table: " + err);
+    process.exit(1);
+  });

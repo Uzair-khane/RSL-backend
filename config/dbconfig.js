@@ -22,15 +22,6 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
       console.error('Unable to connect to the database.');
     });
 
-    sequelize.sync().then((err) => {
-    // put your user create code inside this
-    console.log('Table created.');
-    }, function(err) {
-      console.log('An error occured while creating table: ' +err);
-    });
-    
-    // End of DB script
-    db.sequelize = sequelize;
+db.sequelize = sequelize;
 
-    module.exports = db;
 module.exports = sequelize;
