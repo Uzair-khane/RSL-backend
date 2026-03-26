@@ -85,7 +85,7 @@ const registerAdmin =  async (req, res)=>{
         ) {
         var dir = "./public/uploads/admin/";
         if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
+            fs.mkdirSync(dir, { recursive: true });
         }
         User.create({
             role_id: 1,
