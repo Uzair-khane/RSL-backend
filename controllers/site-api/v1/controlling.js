@@ -1,8 +1,5 @@
-const BookingController = require('./booking')
-//const DataListController = require('./datalist')
-
+const BookingController = require('./booking');
 
 module.exports = {    
     BookingController,  
-   // DataListController, 
 }

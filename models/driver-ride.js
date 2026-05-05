@@ -11,11 +11,11 @@ const DriverRides = sequelize.define('driver_rides',{
       primaryKey: true,
     },
     driver_car_id:{
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     booking_id:{
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     description: {
