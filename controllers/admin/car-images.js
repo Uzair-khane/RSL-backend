@@ -1,5 +1,5 @@
-const sharpFileUpload = require("../../modules/sharp-file-upload"),
-  fs = require("fs");
+const sharpFileUpload = require("../../modules/sharp-file-upload");
+const fs = require("fs");
 const { activityLogsSave } = require("../../modules/activity-logs");
 const CarImages = require("../../models/car-images");
 
@@ -9,9 +9,8 @@ const routeUrl = "/ap/car-images";
 // #Get list page
 const Page = async (req, res) => {
   const carId = req.params.id;
-  const carImages = await CarImages.findAll({
-    where: { car_id: carId },
-  });
+  const carImages = await CarImages.findAll({ where: { car_id: carId } });
+
   res.render("admin/car-images/list", {
     successFlash: req.flash("success"),
     errorFlash: req.flash("error").join("<br />"),
@@ -31,151 +30,100 @@ const List = async (req, res) => {
     let { start, length, draw } = req.body;
     let searchStr = { isDeleted: 0, car_id: carId };
 
-    let dataArr = [];
     let dataArr2 = [];
-    let i = 0;
     let no = Number(start);
 
-    let dataList = await CarImages.findAll({
+    const dataList = await CarImages.findAll({
       where: searchStr,
       order: [["id", "ASC"]],
     });
-    let Total = await CarImages.count({
-      where: { isDeleted: 0, car_id: carId },
-    });
-    let Filtered = await CarImages.count({ where: searchStr });
+    const Total = await CarImages.count({ where: { isDeleted: 0, car_id: carId } });
+    const Filtered = await CarImages.count({ where: searchStr });
 
-    dataList.forEach(async (item) => {
-      i++;
+    for (const item of dataList) {
       no++;
       let isChecked = item.status ? "checked" : "";
       let checkText = item.status ? "Deactivate" : "Activate";
 
-      let image = "";
+      // Fix: remove any extra quotes from image path
+      const fixImagePath = (img) => img.replace(/^"(.*)"$/, "$1");
+
+      let imageHtml = "";
       if (Array.isArray(item.image)) {
         item.image.forEach((val) => {
-          image += `<div class="media-user me-2 d-flex flex-column gap-2">
-                          <div><img alt="No image" class="rounded-circle" src="/${val}"></div>
+          const imgPath = fixImagePath(val);
+          imageHtml += `<div class="media-user me-2 d-flex flex-column gap-2">
+                          <div><img alt="No image" class="rounded-circle" src="/${imgPath}"></div>
                         </div>`;
         });
       } else {
-        image = `<div class="media-user me-2 d-flex flex-column gap-2">
-                       <div><img alt="No image" class="rounded-circle w-25 h-25" src="/${item.image}"></div>
+        const imgPath = fixImagePath(item.image);
+        imageHtml = `<div class="media-user me-2 d-flex flex-column gap-2">
+                       <div><img alt="No image" class="rounded-circle w-25 h-25" src="/${imgPath}"></div>
                      </div>`;
       }
-      dataArr = [
-        no,
-        image,
-        `<div class="form-group" data-toggle="tooltip" title="${checkText}">
-                    <label class="custom-switch form-switch mb-0">
-                        <input type="checkbox" name="custom-switch-radio" class="custom-switch-input" ${isChecked} id="customSwitch${item.id}" onchange="changeStatus('${item.id}','car_images')">
-                        <span class="custom-switch-indicator"></span>
-                    </label>
-                </div>`,
-        `<button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" onclick="deleteRecord('${item.id}','car_images')">
-                    <span class="fe fe-trash-2 fs-12"></span>
-                </button>
-                `,
-      ];
-      dataArr2.push(dataArr);
-    });
 
-    var data = JSON.stringify({
-      draw: draw,
+      dataArr2.push([
+        no,
+        imageHtml,
+        `<div class="form-group" data-toggle="tooltip" title="${checkText}">
+            <label class="custom-switch form-switch mb-0">
+                <input type="checkbox" name="custom-switch-radio" class="custom-switch-input" ${isChecked} id="customSwitch${item.id}" onchange="changeStatus('${item.id}','car_images')">
+                <span class="custom-switch-indicator"></span>
+            </label>
+        </div>`,
+        `<button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete" onclick="deleteRecord('${item.id}','car_images')">
+            <span class="fe fe-trash-2 fs-12"></span>
+        </button>`,
+      ]);
+    }
+
+    res.json({
+      draw,
       recordsTotal: Total,
       recordsFiltered: Filtered,
       data: dataArr2,
     });
-    return res.send(data);
   } catch (error) {
-    console.log(error, "error");
+    console.error("Error in List:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// #Add images
 const Add = async (req, res) => {
   try {
-    let { id } = req.body;
-    let galleryData = [];
-    var dir = "./public/uploads/admin/cars/";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
+    const { id } = req.body;
+    const galleryData = [];
+    const dir = "./public/uploads/admin/cars/";
+
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    if (!req.files || !req.files.image) {
+      return res.json({ success: false, message: "Please select image(s) file to upload!" });
     }
-    var imagename = "";
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.send({
-        success: false,
-        message: `Please select image(s) file to upload!`,
-      });
+
+    // Normalize images array
+    const imagesArray = Array.isArray(req.files.image) ? req.files.image : [req.files.image];
+
+    for (const file of imagesArray) {
+      let imagename = await sharpFileUpload.fileToUpload(file, dir, null, null);
+      // Remove quotes if any
+      imagename = imagename.replace(/^"(.*)"$/, "$1");
+      galleryData.push({ car_id: id, image: imagename });
+    }
+
+    const isUploaded = await CarImages.bulkCreate(galleryData);
+
+    if (isUploaded) {
+      activityLogsSave(req, "add", "Car images have been added.");
+      return res.json({ success: true, message: "Record has been added successfully." });
     } else {
-     
-      if (Array.isArray(req.files.image)) {
-        
-        let imgUploadCounter = 1;
-        req.files.image.forEach(async (element) => {
-          imagename = await sharpFileUpload.fileToUpload(
-            element,
-            dir,
-            null,
-            null
-          );
-          galleryData.push({
-            car_id: id,
-            image: imagename,
-          });
-          if (req.files.image.length == imgUploadCounter) {
-            const isUploaded = await CarImages.bulkCreate(galleryData);
-            if (isUploaded) {
-              /*Activity Logs***************************************** */
-              activityLogsSave(
-                req,
-                (action = "add"),
-                (detail = `car images has been added.`)
-              );
-              // /./Activity Logs**************************************** */
-              return res.send({
-                success: true,
-                message: "Record has been added successfully.",
-              });
-            } else {
-              throw isUploaded;
-            }
-          }
-          imgUploadCounter++;
-        });
-      } else {
-        imagename = await sharpFileUpload.fileToUpload(
-          req.files.image,
-          dir,
-          null,
-          null,
-          "contain"
-        );
-        galleryData.push({
-          car_id: id,
-          image: imagename,
-        });
-        if (galleryData) {
-          const isUploaded = await CarImages.create(galleryData);
-          if (isUploaded) {
-            /*Activity Logs***************************************** */
-            activityLogsSave(
-              req,
-              (action = "add"),
-              (detail = ` car images has been added.`)
-            );
-            // /./Activity Logs**************************************** */
-            return res.send({
-              success: true,
-              message: "Record has been added successfully.",
-            });
-          } else {
-            return res.send({ success: false, message: isUploaded });
-          }
-        }
-      }
+      return res.json({ success: false, message: "Failed to add images." });
     }
   } catch (error) {
-    return res.send({ success: false, message: error.message });
+    console.error("Error in Add:", error);
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -183,5 +131,4 @@ module.exports = {
   Page,
   List,
   Add,
-  // Update,
 };

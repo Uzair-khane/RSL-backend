@@ -11,13 +11,13 @@ const baseUrl = '/api/site/v1';
 /***********************************@Auth ****************************************/
 const   booking                = require('./booking'),   
         general                    =require('./general');
-      
+      const auth = require('./auth');
         
         
 // #USE
 router.use(`${baseUrl}/booking`, booking);
 router.use(`${baseUrl}/general`, general);   
- 
+ router.use(`${baseUrl}/auth`, auth);
 
 
 /********************************************************************************* */
