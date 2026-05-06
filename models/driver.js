@@ -20,6 +20,14 @@ const Drivers = sequelize.define('drivers', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  email: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+image: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
   id_card_no: {
     type: DataTypes.STRING,
     allowNull: false,
