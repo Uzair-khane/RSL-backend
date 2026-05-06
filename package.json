@@ -40,6 +40,7 @@
     "sequelize": "^6.21.2",
     "sharp": "^0.31.2",
     "socket.io": "^4.6.1",
+    "stripe": "^22.1.0",
     "twilio": "^6.0.0"
   },
   "devDependencies": {
