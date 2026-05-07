@@ -1,12 +1,10 @@
 var express = require("express"),
-  // MIDDLEWARES
   { isAdminAuth } = require("../../middleware/auth/admin_auth"),
   router = express.Router();
 
 const baseUrl = "/ap";
 
-// ROUTES
-// #IMPORT
+// IMPORT
 const login = require("./login"),
   dashboard = require("./dashboard"),
   setting = require("./setting"),
@@ -26,8 +24,9 @@ complaints = require("./complaints");
 car_services = require("./car-services");
 accounts = require("./account");
 accounts_history = require("./account-history");
+payments = require("./payments"); // ✅ Naya
 
-// #USE
+// USE
 router.use(`${baseUrl}/auth`, login);
 router.use(`${baseUrl}/home`, isAdminAuth, dashboard);
 router.use(`${baseUrl}/general-setting`, isAdminAuth, setting);
@@ -47,5 +46,6 @@ router.use(`${baseUrl}/complaints`, isAdminAuth, complaints);
 router.use(`${baseUrl}/car-services`, isAdminAuth, car_services);
 router.use(`${baseUrl}/accounts`, isAdminAuth, accounts);
 router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
+router.use(`${baseUrl}/payments`, isAdminAuth, payments); // ✅ Naya
 
 module.exports = router;

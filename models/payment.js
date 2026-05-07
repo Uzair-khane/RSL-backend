@@ -15,7 +15,7 @@ const Payment = sequelize.define('payments', {
   },
   stripe_payment_id: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   amount: {
     type: DataTypes.DECIMAL,
@@ -33,6 +33,14 @@ const Payment = sequelize.define('payments', {
   payment_method: {
     type: DataTypes.STRING,
     defaultValue: 'card',
+  },
+  transfer_reference: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  screenshot: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   description: {
     type: DataTypes.TEXT,
