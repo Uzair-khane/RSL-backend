@@ -1,0 +1,49 @@
+const db = require('../config/db');
+
+class SafetyAlert {
+
+  // SOS Alert save karo
+  static async createSOS(booking_id, customer_id, driver_id, latitude, longitude) {
+    const [result] = await db.query(
+      `INSERT INTO safety_alerts 
+       (booking_id, customer_id, driver_id, alert_type, message, latitude, longitude)
+       VALUES (?, ?, ?, 'sos', 'SOS Emergency Alert', ?, ?)`,
+      [booking_id, customer_id, driver_id, latitude, longitude]
+    );
+    return result;
+  }
+
+  // Breakdown Alert save karo
+  static async createBreakdown(booking_id, customer_id, driver_id, latitude, longitude) {
+    const [result] = await db.query(
+      `INSERT INTO safety_alerts 
+       (booking_id, customer_id, driver_id, alert_type, message, latitude, longitude)
+       VALUES (?, ?, ?, 'breakdown', 'Vehicle Breakdown Reported', ?, ?)`,
+      [booking_id, customer_id, driver_id, latitude, longitude]
+    );
+    return result;
+  }
+
+  // Admin ke liye saari alerts
+  static async getAllAlerts() {
+    const [rows] = await db.query(
+      `SELECT sa.*, u.name as customer_name, u.contact_no 
+       FROM safety_alerts sa
+       LEFT JOIN users u ON sa.customer_id = u.id
+       ORDER BY sa.created_at DESC`
+    );
+    return rows;
+  }
+
+  // Alert resolve karo
+  static async resolveAlert(id) {
+    const [result] = await db.query(
+      `UPDATE safety_alerts SET status = 'resolved' WHERE id = ?`,
+      [id]
+    );
+    return result;
+  }
+
+}
+
+module.exports = SafetyAlert;

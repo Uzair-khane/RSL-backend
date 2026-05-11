@@ -22,7 +22,7 @@ router.get('/history/:booking_id', async (req, res) => {
   return paymentHistory(req, res);
 });
 
-// ✅ Admin Routes
+//  Admin Routes
 router.get('/all', async (req, res) => {
   return getAllPayments(req, res);
 });
