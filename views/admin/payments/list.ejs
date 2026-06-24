@@ -1,267 +1,345 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <%- include ('../partials/head') %>
-<body class="app sidebar-mini ltr">
-  <div class="page">
-    <div class="page-main">
-      <%- include ('../partials/header') %>
-      <%- include ('../partials/sidebar') %>
-      <div class="main-content app-content mt-0">
-        <div class="side-app">
-          <div class="main-container container-fluid">
 
-            <div class="page-header">
-              <h1 class="page-title">Payments</h1>
-              <div>
-                <ol class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="/ap/home">Home</a></li>
-                  <li class="breadcrumb-item active">Payments</li>
-                </ol>
-              </div>
-            </div>
+  <body class="app sidebar-mini ltr">
+    <div class="page">
+      <div class="page-main">
+        <%- include ('../partials/header') %>
+          <%- include ('../partials/sidebar') %>
 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Payments List</h5>
-                    <select class="form-control type-dropdown" id="filter_status" style="width:200px;">
-                      <option value="0" selected>Filter By Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="completed">Completed</option>
-                      <option value="failed">Failed</option>
-                    </select>
-                  </div>
-                  <div class="card-body">
-                    <div class="table-responsive">
-                      <table id="table1" class="table table-sm table-hover" width="100%">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Booking ID</th>
-                            <th>Customer</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Amount</th>
-                            <th>Reference</th>
-                            <th>Screenshot</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody></tbody>
-                      </table>
+            <div class="main-content app-content mt-0">
+              <div class="side-app">
+                <div class="main-container container-fluid">
+
+                  <div class="page-header">
+                    <h1 class="page-title">Payments</h1>
+                    <div>
+                      <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/ap/home">Home</a></li>
+                        <li class="breadcrumb-item active">Payments</li>
+                      </ol>
                     </div>
                   </div>
+
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <h5 class="mb-0">Payments List</h5>
+
+                          <select class="form-control type-dropdown" id="filter_status" style="width:220px;">
+                            <option value="0" selected>Filter By Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="cash_collected">Cash Collected</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                          </select>
+                        </div>
+
+                        <div class="card-body">
+                          <div class="table-responsive">
+                            <table id="table1" class="table table-sm table-hover" width="100%">
+                              <thead>
+                                <tr>
+                                  <th>#</th>
+                                  <th>Booking ID</th>
+                                  <th>Customer</th>
+                                  <th>Phone</th>
+                                  <th>Email</th>
+                                  <th>Amount</th>
+                                  <th>Method</th>
+                                  <th>Reference</th>
+                                  <th>Screenshot</th>
+                                  <th>Status</th>
+                                  <th>Date</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody></tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
+      </div>
 
-          </div>
-        </div>
+      <%- include ('../partials/footer') %>
+    </div>
+
+    <div id="rsl-toast-container"></div>
+
+    <div id="screenshotModal"
+      style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; align-items:center; justify-content:center;">
+      <div style="position:relative; max-width:700px; width:90%;">
+        <button onclick="closeScreenshot()"
+          style="position:absolute; top:-35px; right:0; background:none; border:none; color:#fff; font-size:28px; cursor:pointer;">&times;</button>
+        <img id="screenshotImg" src="" style="width:100%; border-radius:8px;" />
       </div>
     </div>
-    <%- include ('../partials/footer') %>
-  </div>
 
-  <!-- Toast Modal -->
-  <div id="rsl-toast-container"></div>
+    <a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
+    <%- include ('../partials/footer-script') %>
+  </body>
 
-  <!-- Screenshot Modal -->
-  <div id="screenshotModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:99999; align-items:center; justify-content:center;">
-    <div style="position:relative; max-width:700px; width:90%;">
-      <button onclick="closeScreenshot()" style="position:absolute; top:-35px; right:0; background:none; border:none; color:#fff; font-size:28px; cursor:pointer;">&times;</button>
-      <img id="screenshotImg" src="" style="width:100%; border-radius:8px;" />
-    </div>
-  </div>
+  <style>
+    #rsl-toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 99998;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-  <a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
-  <%- include ('../partials/footer-script') %>
-</body>
+    .rsl-toast {
+      min-width: 300px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      animation: toastIn 0.3s ease;
+    }
 
-<style>
-  /* Toast */
-  #rsl-toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 99998;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .rsl-toast {
-    min-width: 300px;
-    padding: 14px 20px;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    animation: toastIn 0.3s ease;
-  }
-  .rsl-toast-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .rsl-toast-success { background: linear-gradient(135deg, #28a745, #20c665); }
-  .rsl-toast-error   { background: linear-gradient(135deg, #dc3545, #ff4d5e); }
-  .rsl-toast-info    { background: linear-gradient(135deg, #0693E3, #00b4f0); }
-  @keyframes toastIn {
-    from { opacity:0; transform: translateX(40px); }
-    to   { opacity:1; transform: translateX(0); }
-  }
-  @keyframes toastOut {
-    from { opacity:1; transform: translateX(0); }
-    to   { opacity:0; transform: translateX(40px); }
-  }
+    .rsl-toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
 
-  /* Action buttons */
-  .action-btns {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    flex-wrap: nowrap;
-  }
-  .action-btns .btn {
-    white-space: nowrap;
-    font-size: 12px;
-    padding: 4px 10px;
-  }
-</style>
+    .rsl-toast-success {
+      background: linear-gradient(135deg, #28a745, #20c665);
+    }
 
-<script>
-  const actionUrl = "<%=actionUrl%>";
-  const baseUrl   = "<%=baseUrl%>";
+    .rsl-toast-error {
+      background: linear-gradient(135deg, #dc3545, #ff4d5e);
+    }
 
-  /* ---- TOAST ---- */
-  function showToast(message, type) {
-    const icons = { success: '✓', error: '✕', info: 'ℹ' };
-    const toast = document.createElement('div');
-    toast.className = 'rsl-toast rsl-toast-' + type;
-    toast.innerHTML = `<span class="rsl-toast-icon">${icons[type] || 'ℹ'}</span><span>${message}</span>`;
-    document.getElementById('rsl-toast-container').appendChild(toast);
-    setTimeout(() => {
-      toast.style.animation = 'toastOut 0.3s ease forwards';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
+    .rsl-toast-info {
+      background: linear-gradient(135deg, #0693E3, #00b4f0);
+    }
 
-  /* ---- DATATABLE ---- */
-  $(function () {
-    var table = $("#table1").DataTable({
-      searching: false,
-      paging: true,
-      responsive: true,
-      order: [[0, "desc"]],
-      pageLength: 30,
-      processing: true,
-      serverSide: true,
-      ajax: {
-        url: actionUrl + '/list',
-        type: "POST",
-        data: function (d) {
-          d.filter_status = $("#filter_status").val();
-        }
-      },
-      columnDefs: [{
-        searchable: false,
-        orderable: false,
-        defaultContent: "-",
-        targets: "_all"
-      }],
-      dom: "Bfrtip"
-    });
-
-    $(document).on("change", ".type-dropdown", function () {
-      table.ajax.reload();
-    });
-  });
-
-  /* ---- APPROVE ---- */
-  function approvePayment(id) {
-    if (!confirm('Approve this payment?')) return;
-    showToast('Processing...', 'info');
-    $.ajax({
-      url: '/ap/payments/approve/' + id,
-      method: 'POST',
-      success: function (res) {
-        if (res && res.success) {
-          showToast(res.message || 'Payment approved!', 'success');
-          $("#table1").DataTable().ajax.reload();
-        } else {
-          showToast(res && res.message ? res.message : 'Approval failed!', 'error');
-        }
-      },
-      error: function (xhr) {
-        console.log('Approve error:', xhr.responseText);
-        showToast('Server error! Check console.', 'error');
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
       }
-    });
-  }
 
-  /* ---- REJECT ---- */
-  function rejectPayment(id) {
-    if (!confirm('Reject this payment?')) return;
-    showToast('Processing...', 'info');
-    $.ajax({
-      url: '/ap/payments/reject/' + id,
-      method: 'POST',
-      success: function (res) {
-        if (res && res.success) {
-          showToast(res.message || 'Payment rejected.', 'success');
-          $("#table1").DataTable().ajax.reload();
-        } else {
-          showToast(res && res.message ? res.message : 'Rejection failed!', 'error');
-        }
-      },
-      error: function (xhr) {
-        console.log('Reject error:', xhr.responseText);
-        showToast('Server error! Check console.', 'error');
+      to {
+        opacity: 1;
+        transform: translateX(0);
       }
-    });
-  }
+    }
 
-  /* ---- DELETE ---- */
-  function deletePayment(id) {
-    if (!confirm('Permanently delete this payment record?')) return;
-    $.ajax({
-      url: '/ap/general/delete/record',
-      method: 'POST',
-      data: { id: id, source_table: 'payments' },
-      success: function (res) {
-        if (res && res.success) {
-          showToast(res.message || 'Deleted!', 'success');
-          $("#table1").DataTable().ajax.reload();
-        } else {
-          showToast(res && res.message ? res.message : 'Delete failed!', 'error');
-        }
-      },
-      error: function () {
-        showToast('Server error! Try again.', 'error');
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
       }
+
+      to {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-btns .btn {
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+  </style>
+
+  <script>
+    const actionUrl = "<%=actionUrl%>";
+    const baseUrl = "<%=baseUrl%>";
+
+    function showToast(message, type) {
+      const icons = { success: '✓', error: '✕', info: 'ℹ' };
+
+      const toast = document.createElement('div');
+      toast.className = 'rsl-toast rsl-toast-' + type;
+      toast.innerHTML = `<span class="rsl-toast-icon">${icons[type] || 'ℹ'}</span><span>${message}</span>`;
+
+      document.getElementById('rsl-toast-container').appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'toastOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    $(function () {
+      var table = $("#table1").DataTable({
+        searching: false,
+        paging: true,
+        responsive: true,
+        order: [[0, "desc"]],
+        pageLength: 30,
+        processing: true,
+        serverSide: true,
+        ajax: {
+          url: actionUrl + '/list',
+          type: "POST",
+          data: function (d) {
+            d.filter_status = $("#filter_status").val();
+          }
+        },
+        columnDefs: [{
+          searchable: false,
+          orderable: false,
+          defaultContent: "-",
+          targets: "_all"
+        }],
+        dom: "Bfrtip"
+      });
+
+      $(document).on("change", ".type-dropdown", function () {
+        table.ajax.reload();
+      });
     });
-  }
 
-  /* ---- SCREENSHOT ---- */
-  function viewScreenshot(path) {
-    const fullPath = baseUrl + path;
-    document.getElementById('screenshotImg').src = fullPath;
-    const modal = document.getElementById('screenshotModal');
-    modal.style.display = 'flex';
-  }
+    function approvePayment(id) {
+      if (!confirm('Verify this payment?')) return;
 
-  function closeScreenshot() {
-    document.getElementById('screenshotModal').style.display = 'none';
-    document.getElementById('screenshotImg').src = '';
-  }
+      showToast('Processing...', 'info');
 
-  document.getElementById('screenshotModal').addEventListener('click', function(e) {
-    if (e.target === this) closeScreenshot();
-  });
-</script>
+      $.ajax({
+        url: '/ap/payments/approve/' + id,
+        method: 'POST',
+        success: function (res) {
+          console.log('VERIFY RESPONSE =>', res);
+
+          if (res && res.success) {
+            showToast(res.message || 'Payment verified!', 'success');
+          } else {
+            showToast(res && res.message ? res.message : 'Verification failed!', 'error');
+          }
+
+          $("#table1").DataTable().ajax.reload();
+        },
+        error: function (xhr) {
+          console.log('VERIFY AJAX ERROR =>', xhr.responseText);
+          showToast('Server error! Check console.', 'error');
+        }
+      });
+    }
+
+    function rejectPayment(id) {
+      if (!confirm('Reject this payment?')) return;
+
+      showToast('Processing...', 'info');
+
+      $.ajax({
+        url: '/ap/payments/reject/' + id,
+        method: 'POST',
+        success: function (res) {
+          console.log('REJECT RESPONSE =>', res);
+
+          if (res && res.success) {
+            showToast(res.message || 'Payment rejected.', 'success');
+          } else {
+            showToast(res && res.message ? res.message : 'Rejection failed!', 'error');
+          }
+
+          $("#table1").DataTable().ajax.reload();
+        },
+        error: function (xhr) {
+          console.log('REJECT AJAX ERROR =>', xhr.responseText);
+          showToast('Server error! Check console.', 'error');
+        }
+      });
+    }
+
+    function cashCollected(id) {
+      if (!confirm('Mark this payment as cash collected?')) return;
+
+      showToast('Processing...', 'info');
+
+      $.ajax({
+        url: '/ap/payments/cash-collected/' + id,
+        method: 'POST',
+        success: function (res) {
+          console.log('CASH COLLECTED RESPONSE =>', res);
+
+          if (res && res.success) {
+            showToast(res.message || 'Cash payment collected.', 'success');
+          } else {
+            showToast(res && res.message ? res.message : 'Cash collection failed!', 'error');
+          }
+
+          $("#table1").DataTable().ajax.reload();
+        },
+        error: function (xhr) {
+          console.log('CASH COLLECTED AJAX ERROR =>', xhr.responseText);
+          showToast('Server error! Check console.', 'error');
+        }
+      });
+    }
+
+    function deletePayment(id) {
+      if (!confirm('Permanently delete this payment record?')) return;
+
+      $.ajax({
+        url: '/ap/general/delete/record',
+        method: 'POST',
+        data: {
+          id: id,
+          source_table: 'payments'
+        },
+        success: function (res) {
+          console.log('DELETE RESPONSE =>', res);
+
+          if (res && res.success) {
+            showToast(res.message || 'Deleted!', 'success');
+            $("#table1").DataTable().ajax.reload();
+          } else {
+            showToast(res && res.message ? res.message : 'Delete failed!', 'error');
+          }
+        },
+        error: function (xhr) {
+          console.log('DELETE AJAX ERROR =>', xhr.responseText);
+          showToast('Server error! Try again.', 'error');
+        }
+      });
+    }
+
+    function viewScreenshot(path) {
+      const fullPath = baseUrl + path;
+      document.getElementById('screenshotImg').src = fullPath;
+
+      const modal = document.getElementById('screenshotModal');
+      modal.style.display = 'flex';
+    }
+
+    function closeScreenshot() {
+      document.getElementById('screenshotModal').style.display = 'none';
+      document.getElementById('screenshotImg').src = '';
+    }
+
+    document.getElementById('screenshotModal').addEventListener('click', function (e) {
+      if (e.target === this) closeScreenshot();
+    });
+  </script>
+
 </html>

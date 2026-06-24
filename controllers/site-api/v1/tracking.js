@@ -1,6 +1,5 @@
-const express = require('express');
-const router = express.Router();
 const DriverLocation = require('../../../models/driver_location');
+const RideRoute = require('../../../models/ride_route');
 
 /* =====================================================
    POST — DRIVER LOCATION UPDATE
@@ -26,15 +25,44 @@ const updateLocation = async (req, res) => {
       });
     }
 
+    const locationStatus = status || 'active';
+
     const location = await DriverLocation.create({
       driver_id,
       booking_id,
       latitude: lat,
       longitude: lng,
-      status: status || 'active',
+      status: locationStatus,
       createdAt: new Date(),
       updatedAt: new Date()
     });
+
+    let rideRoute = await RideRoute.findOne({
+      where: {
+        booking_id,
+        isDeleted: 0
+      }
+    });
+
+    if (!rideRoute) {
+      rideRoute = await RideRoute.create({
+        booking_id,
+        start_latitude: lat,
+        start_longitude: lng,
+        end_latitude: lat,
+        end_longitude: lng,
+        status: locationStatus === 'completed' ? 'completed' : 'started',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } else {
+      await rideRoute.update({
+        end_latitude: lat,
+        end_longitude: lng,
+        status: locationStatus === 'completed' ? 'completed' : 'started',
+        updatedAt: new Date()
+      });
+    }
 
     const io = req.app.get('socketio');
 
@@ -44,20 +72,21 @@ const updateLocation = async (req, res) => {
         booking_id,
         latitude: lat,
         longitude: lng,
-        status: status || 'active'
+        status: locationStatus
       });
     }
 
     return res.send({
       success: true,
-      message: 'Location updated successfully.',
+      message: 'Location and ride route updated successfully.',
       data: {
         id: location.id,
         driver_id,
         booking_id,
         latitude: lat,
         longitude: lng,
-        status: status || 'active'
+        status: locationStatus,
+        ride_route_id: rideRoute.id
       }
     });
 

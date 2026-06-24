@@ -9,54 +9,81 @@ const Payment = sequelize.define('payments', {
     autoIncrement: true,
     primaryKey: true,
   },
+
   booking_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+
   stripe_payment_id: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+
   amount: {
     type: DataTypes.DECIMAL,
     allowNull: false,
   },
+
   currency: {
     type: DataTypes.STRING,
     defaultValue: 'PKR',
   },
+
   payment_status: {
     type: DataTypes.ENUM,
-    values: ['pending', 'completed', 'failed'],
+    values: [
+      'pending',
+      'completed',
+      'failed',
+      'verified',
+      'rejected',
+      'cash_collected'
+    ],
     defaultValue: 'pending',
   },
+
   payment_method: {
     type: DataTypes.STRING,
     defaultValue: 'card',
   },
+
   transfer_reference: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+
   screenshot: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+
   description: {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+
   status: {
     type: DataTypes.TINYINT,
     defaultValue: 1,
   },
+
   isDeleted: {
     type: DataTypes.TINYINT,
     defaultValue: 0,
   },
-}, { freezeTableName: true });
+}, {
+  freezeTableName: true
+});
 
-Bookings.hasMany(Payment, { foreignKey: 'booking_id', as: 'payments' });
-Payment.belongsTo(Bookings, { foreignKey: 'booking_id', as: 'booking' });
+Bookings.hasMany(Payment, {
+  foreignKey: 'booking_id',
+  as: 'payments'
+});
+
+Payment.belongsTo(Bookings, {
+  foreignKey: 'booking_id',
+  as: 'booking'
+});
 
 module.exports = Payment;

@@ -46,6 +46,6 @@ router.use(`${baseUrl}/complaints`, isAdminAuth, complaints);
 router.use(`${baseUrl}/car-services`, isAdminAuth, car_services);
 router.use(`${baseUrl}/accounts`, isAdminAuth, accounts);
 router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
-router.use(`${baseUrl}/payments`, isAdminAuth, payments); // ✅ Naya
-
+router.use(`${baseUrl}/payments`, isAdminAuth, payments);
+// router.use(`${baseUrl}/payments`, payments); // TEMP FIX
 module.exports = router;
