@@ -50,4 +50,16 @@ router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
 router.use(`${baseUrl}/payments`, isAdminAuth, payments);
 // router.use(`${baseUrl}/payments`, payments); // TEMP FIX
 router.use(`${baseUrl}/safety-alerts`, isAdminAuth, safetyAlertsRoute);
+// Offline GPS Tracking Admin List
+router.get("/offline-tracking", isAdminAuth, async function (req, res) {
+  try {
+    res.render("admin/offline_tracking/list", {
+      title: "Offline GPS Tracking",
+    });
+  } catch (error) {
+    console.log(error);
+    req.flash("error", "Something went wrong");
+    res.redirect("/admin/dashboard");
+  }
+});
 module.exports = router;

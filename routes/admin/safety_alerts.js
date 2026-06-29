@@ -192,5 +192,40 @@ router.post("/pending/:id", async (req, res) => {
         });
     }
 });
+router.post("/status/:id", async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        if (!["pending", "resolved", "rejected"].includes(status)) {
+            return res.json({
+                success: false,
+                message: "Invalid status selected.",
+            });
+        }
+
+        await sequelize.query(
+            "UPDATE safety_alerts SET status = :status WHERE id = :id",
+            {
+                replacements: {
+                    status,
+                    id: req.params.id,
+                },
+                type: QueryTypes.UPDATE,
+            }
+        );
+
+        return res.json({
+            success: true,
+            message: "Safety alert status updated successfully.",
+        });
+    } catch (error) {
+        console.log("Safety Status Update Error:", error.message);
+
+        return res.json({
+            success: false,
+            message: error.message || "Unable to update status.",
+        });
+    }
+});
 
 module.exports = router;
