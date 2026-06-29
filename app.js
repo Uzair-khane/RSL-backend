@@ -212,7 +212,9 @@ app.use(async function (req, res, next) {
     menuArr.forEach((element) => {
       userMenus.push(element.menus);
     });
+
     res.locals.userMenus = userMenus;
+    res.locals.baseUrl = "/ap";
   }
   /*-------./GET ROLE BASED MENUS---------*/
   const notificationList = await Bookings.findAll({
@@ -221,7 +223,7 @@ app.use(async function (req, res, next) {
     },
     order: [["id", "DESC"]],
     limit: 10,
-  });  
+  });
   res.locals.notificationList = notificationList;
   next();
 });

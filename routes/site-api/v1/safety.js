@@ -113,41 +113,38 @@ async function sendAdminEmail({
           <hr/>
 
           <h3>Passenger Current Location</h3>
-          ${
-            passengerMapLink
-              ? `<p><a href="${passengerMapLink}" target="_blank" style="color:${color};font-weight:bold;">Open Passenger Location on Google Maps</a></p>
+          ${passengerMapLink
+          ? `<p><a href="${passengerMapLink}" target="_blank" style="color:${color};font-weight:bold;">Open Passenger Location on Google Maps</a></p>
                  <p>Lat: ${passenger_latitude}, Lng: ${passenger_longitude}</p>`
-              : `<p style="color:gray;">Passenger location not available.</p>`
-          }
+          : `<p style="color:gray;">Passenger location not available.</p>`
+        }
 
           <h3>Car / Driver Latest Location</h3>
-          ${
-            carMapLink
-              ? `<p><a href="${carMapLink}" target="_blank" style="color:${color};font-weight:bold;">Open Car Current Location on Google Maps</a></p>
+          ${carMapLink
+          ? `<p><a href="${carMapLink}" target="_blank" style="color:${color};font-weight:bold;">Open Car Current Location on Google Maps</a></p>
                  <p>Lat: ${carLocation.latitude}, Lng: ${carLocation.longitude}</p>
                  <p><strong>Last Updated:</strong> ${carLocation.createdAt || 'N/A'}</p>`
-              : `<p style="color:gray;">Car current location not available yet.</p>`
-          }
+          : `<p style="color:gray;">Car current location not available yet.</p>`
+        }
 
           <hr/>
 
           <h3>Recommended Admin Action</h3>
-          ${
-            type === 'misbehaviour'
-              ? `<ul>
+          ${type === 'misbehaviour'
+          ? `<ul>
                    <li>Immediately call the passenger.</li>
                    <li>Call the driver and verify the situation.</li>
                    <li>Track the ride live using the car location.</li>
                    <li>If passenger is at risk, escalate to emergency response.</li>
                    <li>Mark alert resolved only after passenger safety is confirmed.</li>
                  </ul>`
-              : `<ul>
+          : `<ul>
                    <li>Open the live location immediately.</li>
                    <li>Contact passenger and driver.</li>
                    <li>Dispatch help if required.</li>
                    <li>Resolve alert after the situation is handled.</li>
                  </ul>`
-          }
+        }
 
           <p style="margin-top:20px;font-size:12px;color:gray;">
             RSL — Real Smart Limousine Safety System

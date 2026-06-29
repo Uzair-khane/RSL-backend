@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%- include ('../partials/head') %>
+
+    <body class="app sidebar-mini ltr">
+        <div class="page">
+            <div class="page-main">
+                <%- include ('../partials/header') %>
+                    <%- include ('../partials/sidebar') %>
+
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+                                <div class="main-container container-fluid">
+
+                                    <div class="page-header">
+                                        <h1 class="page-title">
+                                            <%= pageTitle %>
+                                        </h1>
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item"><a href="/ap/home">Home</a></li>
+                                                <li class="breadcrumb-item active">
+                                                    <%= pageTitle %>
+                                                </li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+
+                                                <div
+                                                    class="card-header d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">
+                                                        <%= pageTitle %> List
+                                                    </h5>
+
+                                                    <select class="form-control type-dropdown" id="filter_status"
+                                                        style="width:220px;">
+                                                        <option value="0" selected>Filter By Status</option>
+                                                        <option value="pending">Pending</option>
+                                                        <option value="resolved">Resolved</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table id="table1" class="table table-sm table-hover"
+                                                            width="100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Booking ID</th>
+                                                                    <th>Passenger</th>
+                                                                    <th>Passenger Phone</th>
+                                                                    <th>Driver</th>
+                                                                    <th>Driver Phone</th>
+                                                                    <th>Type</th>
+                                                                    <th>Message</th>
+                                                                    <th>Reason</th>
+                                                                    <th>Location</th>
+                                                                    <th>Status</th>
+                                                                    <th>Date</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+            </div>
+
+            <%- include ('../partials/footer') %>
+        </div>
+
+        <div id="rsl-toast-container"></div>
+
+        <a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
+        <%- include ('../partials/footer-script') %>
+    </body>
+
+    <style>
+        #rsl-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99998;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rsl-toast {
+            min-width: 300px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .rsl-toast-success {
+            background: linear-gradient(135deg, #28a745, #20c665);
+        }
+
+        .rsl-toast-error {
+            background: linear-gradient(135deg, #dc3545, #ff4d5e);
+        }
+
+        .rsl-toast-info {
+            background: linear-gradient(135deg, #0693E3, #00b4f0);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btns .btn {
+            white-space: nowrap;
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+    </style>
+
+    <script>
+        const actionUrl = "<%=actionUrl%>";
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'rsl-toast rsl-toast-' + type;
+            toast.innerHTML = `<span>${message}</span>`;
+            document.getElementById('rsl-toast-container').appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        $(function () {
+            var table = $("#table1").DataTable({
+                searching: false,
+                paging: true,
+                responsive: true,
+                order: [[0, "desc"]],
+                pageLength: 30,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: actionUrl + '/list',
+                    type: "POST",
+                    data: function (d) {
+                        d.filter_status = $("#filter_status").val();
+                    }
+                },
+                columnDefs: [{
+                    searchable: false,
+                    orderable: false,
+                    defaultContent: "-",
+                    targets: "_all"
+                }],
+                dom: "Bfrtip"
+            });
+
+            $(document).on("change", ".type-dropdown", function () {
+                table.ajax.reload();
+            });
+        });
+
+        function markResolved(id) {
+            if (!confirm('Mark this safety alert as resolved?')) return;
+
+            showToast('Processing...', 'info');
+
+            $.ajax({
+                url: '/ap/safety-alerts/resolve/' + id,
+                method: 'POST',
+                success: function (res) {
+                    if (res && res.success) {
+                        showToast(res.message || 'Alert resolved.', 'success');
+                    } else {
+                        showToast(res.message || 'Failed.', 'error');
+                    }
+
+                    $("#table1").DataTable().ajax.reload();
+                },
+                error: function () {
+                    showToast('Server error!', 'error');
+                }
+            });
+        }
+
+        function markPending(id) {
+            if (!confirm('Mark this safety alert as pending?')) return;
+
+            showToast('Processing...', 'info');
+
+            $.ajax({
+                url: '/ap/safety-alerts/pending/' + id,
+                method: 'POST',
+                success: function (res) {
+                    if (res && res.success) {
+                        showToast(res.message || 'Alert updated.', 'success');
+                    } else {
+                        showToast(res.message || 'Failed.', 'error');
+                    }
+
+                    $("#table1").DataTable().ajax.reload();
+                },
+                error: function () {
+                    showToast('Server error!', 'error');
+                }
+            });
+        }
+    </script>
+
+</html>

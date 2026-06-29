@@ -24,7 +24,8 @@ complaints = require("./complaints");
 car_services = require("./car-services");
 accounts = require("./account");
 accounts_history = require("./account-history");
-payments = require("./payments"); // ✅ Naya
+payments = require("./payments");
+const safetyAlertsRoute = require("./safety_alerts");
 
 // USE
 router.use(`${baseUrl}/auth`, login);
@@ -48,4 +49,5 @@ router.use(`${baseUrl}/accounts`, isAdminAuth, accounts);
 router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
 router.use(`${baseUrl}/payments`, isAdminAuth, payments);
 // router.use(`${baseUrl}/payments`, payments); // TEMP FIX
+router.use(`${baseUrl}/safety-alerts`, isAdminAuth, safetyAlertsRoute);
 module.exports = router;
