@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%- include ('../partials/head') %>
+
+    <body class="app sidebar-mini ltr">
+        <div class="page">
+            <div class="page-main">
+                <%- include ('../partials/header') %>
+                    <%- include ('../partials/sidebar') %>
+
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+                                <div class="main-container container-fluid">
+
+                                    <div class="page-header">
+                                        <h1 class="page-title">Offline GPS Tracking</h1>
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item"><a href="/ap/home">Home</a></li>
+                                                <li class="breadcrumb-item active">Offline GPS Tracking</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" id="routeSummary" style="display:none;">
+                                        <div class="col-md-3">
+                                            <div class="card bg-primary text-white">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">Booking ID</h6>
+                                                    <h3 id="summaryBooking">-</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card bg-success text-white">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">Driver</h6>
+                                                    <h3 id="summaryDriver">-</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card bg-info text-white">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">Offline Points</h6>
+                                                    <h3 id="summaryPoints">0</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="card bg-warning text-white">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">Distance</h6>
+                                                    <h3 id="summaryDistance">0 KM</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">First Recorded</h6>
+                                                    <p id="summaryFirst" class="mb-0">-</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="mb-1">Last Synced</h6>
+                                                    <p id="summarySync" class="mb-0">-</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+
+                                                <div
+                                                    class="card-header d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">Offline GPS Records</h5>
+
+                                                    <div class="d-flex gap-2">
+                                                        <input type="text" id="filter_booking_id" class="form-control"
+                                                            placeholder="Booking ID" style="width:180px;" />
+                                                        <input type="text" id="filter_driver_id" class="form-control"
+                                                            placeholder="Driver ID" style="width:180px;" />
+                                                        <button class="btn btn-primary"
+                                                            onclick="reloadTable()">Filter</button>
+                                                        <button class="btn btn-secondary"
+                                                            onclick="resetFilter()">Reset</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="alert alert-info mb-3">
+                                                        Click <b>View Route</b> to display offline GPS route with
+                                                        start/end markers and route summary.
+                                                    </div>
+
+                                                    <div id="offlineMap"
+                                                        style="height:430px; width:100%; border-radius:10px; margin-bottom:25px;">
+                                                    </div>
+
+                                                    <div class="table-responsive">
+                                                        <table id="table1" class="table table-sm table-hover"
+                                                            width="100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Booking ID</th>
+                                                                    <th>Driver</th>
+                                                                    <th>Latitude</th>
+                                                                    <th>Longitude</th>
+                                                                    <th>Accuracy</th>
+                                                                    <th>Recorded At</th>
+                                                                    <th>Synced At</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+            </div>
+
+            <%- include ('../partials/footer') %>
+        </div>
+
+        <a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
+        <%- include ('../partials/footer-script') %>
+    </body>
+
+    <style>
+        #routeSummary .card {
+            border-radius: 12px;
+            min-height: 105px;
+        }
+
+        #routeSummary h3 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        #routeSummary h6 {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+    </style>
+
+    <script>
+        var actionUrl = "<%= actionUrl %>";
+        var map;
+        var markers = [];
+        var routePolyline = null;
+        var infoWindow = null;
+
+        function initOfflineMap() {
+            var defaultCenter = { lat: 34.0012, lng: 71.5249 };
+
+            map = new google.maps.Map(document.getElementById("offlineMap"), {
+                zoom: 13,
+                center: defaultCenter,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+        }
+
+        function clearMap() {
+            markers.forEach(function (marker) {
+                marker.setMap(null);
+            });
+
+            markers = [];
+
+            if (routePolyline) {
+                routePolyline.setMap(null);
+                routePolyline = null;
+            }
+
+            if (infoWindow) {
+                infoWindow.close();
+            }
+        }
+
+        function formatDateTime(value) {
+            if (!value) return "-";
+
+            var date = new Date(value);
+
+            if (isNaN(date.getTime())) return "-";
+
+            return date.toLocaleString();
+        }
+
+        function calculateDistanceKm(points) {
+            if (!points || points.length < 2) return 0;
+
+            var total = 0;
+
+            for (var i = 1; i < points.length; i++) {
+                total += haversineDistance(points[i - 1], points[i]);
+            }
+
+            return total;
+        }
+
+        function haversineDistance(pointA, pointB) {
+            var R = 6371;
+            var dLat = toRad(pointB.lat - pointA.lat);
+            var dLng = toRad(pointB.lng - pointA.lng);
+
+            var lat1 = toRad(pointA.lat);
+            var lat2 = toRad(pointB.lat);
+
+            var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c;
+        }
+
+        function toRad(value) {
+            return value * Math.PI / 180;
+        }
+
+        function updateSummary(summary, distanceKm) {
+            $("#routeSummary").show();
+
+            $("#summaryBooking").text(summary && summary.booking_id ? "#" + summary.booking_id : "-");
+            $("#summaryDriver").text(summary && summary.driver_name ? summary.driver_name : "N/A");
+            $("#summaryPoints").text(summary && summary.total_points ? summary.total_points : 0);
+            $("#summaryDistance").text(distanceKm.toFixed(2) + " KM");
+            $("#summaryFirst").text(summary && summary.first_recorded_at ? formatDateTime(summary.first_recorded_at) : "-");
+            $("#summarySync").text(summary && summary.last_synced_at ? formatDateTime(summary.last_synced_at) : "-");
+        }
+
+        function createMarker(point, index, totalPoints, rawItem) {
+            var labelText = String(index + 1);
+            var markerTitle = "Point " + labelText;
+            var iconColor = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+
+            if (index === 0) {
+                markerTitle = "Start Point";
+                iconColor = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                labelText = "S";
+            }
+
+            if (index === totalPoints - 1) {
+                markerTitle = "End Point";
+                iconColor = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+                labelText = "E";
+            }
+
+            var marker = new google.maps.Marker({
+                position: point,
+                map: map,
+                label: labelText,
+                title: markerTitle,
+                icon: iconColor
+            });
+
+            marker.addListener("click", function () {
+                var content = `
+        <div style="min-width:220px;">
+          <h6 style="margin:0 0 8px 0;">${markerTitle}</h6>
+          <p style="margin:0;"><b>Booking:</b> #${rawItem.booking_id || "-"}</p>
+          <p style="margin:0;"><b>Driver:</b> ${rawItem.driver_name || "N/A"}</p>
+          <p style="margin:0;"><b>Lat:</b> ${rawItem.latitude}</p>
+          <p style="margin:0;"><b>Lng:</b> ${rawItem.longitude}</p>
+          <p style="margin:0;"><b>Accuracy:</b> ${rawItem.accuracy || "N/A"} m</p>
+          <p style="margin:0;"><b>Recorded:</b> ${formatDateTime(rawItem.recorded_at)}</p>
+        </div>
+      `;
+
+                infoWindow.setContent(content);
+                infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
+        }
+
+        function viewRoute(bookingId) {
+            if (!bookingId) return;
+
+            $.ajax({
+                url: actionUrl + "/route-points/" + bookingId,
+                method: "GET",
+                success: function (res) {
+                    clearMap();
+
+                    if (!res || !res.success || !res.data || res.data.length === 0) {
+                        alert("No offline route points found.");
+                        $("#routeSummary").hide();
+                        return;
+                    }
+
+                    var points = res.data.map(function (item) {
+                        return {
+                            lat: Number(item.latitude),
+                            lng: Number(item.longitude)
+                        };
+                    });
+
+                    var distanceKm = calculateDistanceKm(points);
+                    updateSummary(res.summary, distanceKm);
+
+                    points.forEach(function (point, index) {
+                        createMarker(point, index, points.length, res.data[index]);
+                    });
+
+                    drawRoadRoute(points);
+
+                    var bounds = new google.maps.LatLngBounds();
+
+                    points.forEach(function (point) {
+                        bounds.extend(point);
+                    });
+
+                    map.fitBounds(bounds);
+
+                    if (points.length === 1) {
+                        map.setZoom(16);
+                        map.setCenter(points[0]);
+                    }
+
+                    $("html, body").animate({
+                        scrollTop: $("#routeSummary").offset().top - 90
+                    }, 500);
+                },
+                error: function (err) {
+                    console.log(err);
+                    alert("Error loading route points.");
+                }
+            });
+        }
+        function drawRoadRoute(points) {
+            if (!points || points.length < 2) return;
+
+            var directionsService = new google.maps.DirectionsService();
+
+            var startPoint = points[0];
+            var endPoint = points[points.length - 1];
+
+            var middlePoints = points.slice(1, points.length - 1);
+
+            var waypoints = middlePoints.slice(0, 23).map(function (point) {
+                return {
+                    location: point,
+                    stopover: true
+                };
+            });
+
+            directionsService.route(
+                {
+                    origin: startPoint,
+                    destination: endPoint,
+                    waypoints: waypoints,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    optimizeWaypoints: false
+                },
+                function (response, status) {
+                    if (status === "OK" && response) {
+                        routePolyline = new google.maps.DirectionsRenderer({
+                            map: map,
+                            directions: response,
+                            suppressMarkers: true,
+                            preserveViewport: true,
+                            polylineOptions: {
+                                strokeOpacity: 1.0,
+                                strokeWeight: 5
+                            }
+                        });
+                    } else {
+                        console.log("Directions route failed:", status);
+
+                        routePolyline = new google.maps.Polyline({
+                            path: points,
+                            geodesic: true,
+                            strokeOpacity: 1.0,
+                            strokeWeight: 5
+                        });
+
+                        routePolyline.setMap(map);
+                    }
+                }
+            );
+        }
+
+        function reloadTable() {
+            $("#table1").DataTable().ajax.reload();
+        }
+
+        function resetFilter() {
+            $("#filter_booking_id").val("");
+            $("#filter_driver_id").val("");
+            reloadTable();
+        }
+
+        $(function () {
+            $("#table1").DataTable({
+                searching: true,
+                paging: true,
+                responsive: true,
+                order: [[0, "desc"]],
+                pageLength: 30,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: actionUrl + "/list",
+                    type: "POST",
+                    data: function (d) {
+                        d.filter_booking_id = $("#filter_booking_id").val();
+                        d.filter_driver_id = $("#filter_driver_id").val();
+                    }
+                },
+                columnDefs: [{
+                    searchable: false,
+                    orderable: false,
+                    defaultContent: "-",
+                    targets: "_all"
+                }],
+                dom: "Bfrtip"
+            });
+        });
+    </script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=<%= GOOGLE_MAP_API_KEY %>&callback=initOfflineMap"></script>
+
+</html>

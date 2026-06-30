@@ -13,19 +13,21 @@ const login = require("./login"),
   profile = require("./profile"),
   rbac = require("./rbac"),
   page = require("./page");
-drivers = require("./drivers");
-cars = require("./cars");
-bookings = require("./bookings");
-driver_car = require("./driver-car");
-prices = require("./prices");
-news_events = require("./news-events");
-car_images = require("./car-images");
-complaints = require("./complaints");
-car_services = require("./car-services");
-accounts = require("./account");
-accounts_history = require("./account-history");
-payments = require("./payments");
+
+const drivers = require("./drivers");
+const cars = require("./cars");
+const bookings = require("./bookings");
+const driver_car = require("./driver-car");
+const prices = require("./prices");
+const news_events = require("./news-events");
+const car_images = require("./car-images");
+const complaints = require("./complaints");
+const car_services = require("./car-services");
+const accounts = require("./account");
+const accounts_history = require("./account-history");
+const payments = require("./payments");
 const safetyAlertsRoute = require("./safety_alerts");
+const offlineTrackingRoute = require("./offline_tracking");
 
 // USE
 router.use(`${baseUrl}/auth`, login);
@@ -48,18 +50,7 @@ router.use(`${baseUrl}/car-services`, isAdminAuth, car_services);
 router.use(`${baseUrl}/accounts`, isAdminAuth, accounts);
 router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
 router.use(`${baseUrl}/payments`, isAdminAuth, payments);
-// router.use(`${baseUrl}/payments`, payments); // TEMP FIX
 router.use(`${baseUrl}/safety-alerts`, isAdminAuth, safetyAlertsRoute);
-// Offline GPS Tracking Admin List
-router.get("/offline-tracking", isAdminAuth, async function (req, res) {
-  try {
-    res.render("admin/offline_tracking/list", {
-      title: "Offline GPS Tracking",
-    });
-  } catch (error) {
-    console.log(error);
-    req.flash("error", "Something went wrong");
-    res.redirect("/admin/dashboard");
-  }
-});
+router.use(`${baseUrl}/offline-tracking`, offlineTrackingRoute);
+
 module.exports = router;
