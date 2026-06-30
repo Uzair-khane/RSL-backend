@@ -2,6 +2,71 @@
 <html lang="en" dir="ltr">
 <%- include ('../partials/head') %>
 
+    <style>
+        .route-summary-box {
+            border: 1px solid #edf0f5;
+            border-radius: 14px;
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .route-summary-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .route-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+        }
+
+        .route-stat {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .route-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #f2f4ff;
+            color: #6c5ffc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .route-stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+
+        .route-stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        @media (max-width: 1200px) {
+            .route-summary-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .route-summary-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+    </style>
+
     <body class="app sidebar-mini ltr">
         <div class="page">
             <div class="page-main">
@@ -22,57 +87,57 @@
                                         </div>
                                     </div>
 
-                                    <div class="row" id="routeSummary" style="display:none;">
-                                        <div class="col-md-3">
-                                            <div class="card bg-primary text-white">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">Booking ID</h6>
-                                                    <h3 id="summaryBooking">-</h3>
-                                                </div>
-                                            </div>
+                                    <div id="routeSummary" class="route-summary-box" style="display:none;">
+                                        <div class="route-summary-title">
+                                            <i class="fa fa-clipboard-list"></i> Route Summary
                                         </div>
 
-                                        <div class="col-md-3">
-                                            <div class="card bg-success text-white">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">Driver</h6>
-                                                    <h3 id="summaryDriver">-</h3>
+                                        <div class="route-summary-grid">
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-car"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">Booking ID</div>
+                                                    <div class="route-stat-value" id="summaryBooking">-</div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-3">
-                                            <div class="card bg-info text-white">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">Offline Points</h6>
-                                                    <h3 id="summaryPoints">0</h3>
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-route"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">Total Distance</div>
+                                                    <div class="route-stat-value" id="summaryDistance">0 KM</div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-3">
-                                            <div class="card bg-warning text-white">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">Distance</h6>
-                                                    <h3 id="summaryDistance">0 KM</h3>
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-clock"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">Duration</div>
+                                                    <div class="route-stat-value" id="summaryDuration">-</div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">First Recorded</h6>
-                                                    <p id="summaryFirst" class="mb-0">-</p>
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-map-marker"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">Total Points</div>
+                                                    <div class="route-stat-value" id="summaryPoints">0</div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h6 class="mb-1">Last Synced</h6>
-                                                    <p id="summarySync" class="mb-0">-</p>
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-play"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">Start Time</div>
+                                                    <div class="route-stat-value" id="summaryFirst">-</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="route-stat">
+                                                <div class="route-stat-icon"><i class="fa fa-stop"></i></div>
+                                                <div>
+                                                    <div class="route-stat-label">End Time</div>
+                                                    <div class="route-stat-value" id="summarySync">-</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -145,23 +210,6 @@
         <%- include ('../partials/footer-script') %>
     </body>
 
-    <style>
-        #routeSummary .card {
-            border-radius: 12px;
-            min-height: 105px;
-        }
-
-        #routeSummary h3 {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        #routeSummary h6 {
-            font-size: 13px;
-            opacity: 0.9;
-        }
-    </style>
-
     <script>
         var actionUrl = "<%= actionUrl %>";
         var map;
@@ -202,12 +250,21 @@
 
         function formatDateTime(value) {
             if (!value) return "-";
-
             var date = new Date(value);
-
             if (isNaN(date.getTime())) return "-";
-
             return date.toLocaleString();
+        }
+
+        function getDuration(start, end) {
+            if (!start || !end) return "-";
+
+            var startDate = new Date(start);
+            var endDate = new Date(end);
+            var diffMs = endDate - startDate;
+            var diffMin = Math.round(diffMs / 60000);
+
+            if (diffMin <= 0) return "Less than 1 min";
+            return diffMin + " mins";
         }
 
         function calculateDistanceKm(points) {
@@ -226,7 +283,6 @@
             var R = 6371;
             var dLat = toRad(pointB.lat - pointA.lat);
             var dLng = toRad(pointB.lng - pointA.lng);
-
             var lat1 = toRad(pointA.lat);
             var lat2 = toRad(pointB.lat);
 
@@ -247,11 +303,11 @@
             $("#routeSummary").show();
 
             $("#summaryBooking").text(summary && summary.booking_id ? "#" + summary.booking_id : "-");
-            $("#summaryDriver").text(summary && summary.driver_name ? summary.driver_name : "N/A");
-            $("#summaryPoints").text(summary && summary.total_points ? summary.total_points : 0);
             $("#summaryDistance").text(distanceKm.toFixed(2) + " KM");
+            $("#summaryDuration").text(summary ? getDuration(summary.first_recorded_at, summary.last_recorded_at) : "-");
+            $("#summaryPoints").text(summary && summary.total_points ? summary.total_points : 0);
             $("#summaryFirst").text(summary && summary.first_recorded_at ? formatDateTime(summary.first_recorded_at) : "-");
-            $("#summarySync").text(summary && summary.last_synced_at ? formatDateTime(summary.last_synced_at) : "-");
+            $("#summarySync").text(summary && summary.last_recorded_at ? formatDateTime(summary.last_recorded_at) : "-");
         }
 
         function createMarker(point, index, totalPoints, rawItem) {
@@ -280,15 +336,50 @@
             });
 
             marker.addListener("click", function () {
+                var googleMapUrl =
+                    "https://www.google.com/maps?q=" +
+                    rawItem.latitude +
+                    "," +
+                    rawItem.longitude;
+
                 var content = `
-        <div style="min-width:220px;">
-          <h6 style="margin:0 0 8px 0;">${markerTitle}</h6>
-          <p style="margin:0;"><b>Booking:</b> #${rawItem.booking_id || "-"}</p>
-          <p style="margin:0;"><b>Driver:</b> ${rawItem.driver_name || "N/A"}</p>
-          <p style="margin:0;"><b>Lat:</b> ${rawItem.latitude}</p>
-          <p style="margin:0;"><b>Lng:</b> ${rawItem.longitude}</p>
-          <p style="margin:0;"><b>Accuracy:</b> ${rawItem.accuracy || "N/A"} m</p>
-          <p style="margin:0;"><b>Recorded:</b> ${formatDateTime(rawItem.recorded_at)}</p>
+        <div style="min-width:240px;">
+          <h6 style="margin:0 0 10px 0;">${markerTitle}</h6>
+
+          <p style="margin:3px 0;">
+            <b>Booking:</b> #${rawItem.booking_id || "-"}
+          </p>
+
+          <p style="margin:3px 0;">
+            <b>Driver:</b> ${rawItem.driver_name || "N/A"}
+          </p>
+
+          <p style="margin:3px 0;">
+            <b>Accuracy:</b> ${rawItem.accuracy || "N/A"} m
+          </p>
+
+          <p style="margin:3px 0;">
+            <b>Recorded:</b> ${formatDateTime(rawItem.recorded_at)}
+          </p>
+
+          <hr style="margin:8px 0;">
+
+          <a
+            href="${googleMapUrl}"
+            target="_blank"
+            style="
+              display:inline-block;
+              background:#0d6efd;
+              color:#fff;
+              padding:8px 12px;
+              border-radius:6px;
+              text-decoration:none;
+              font-size:13px;
+              font-weight:600;
+            "
+          >
+             Open in Google Maps
+          </a>
         </div>
       `;
 
@@ -297,6 +388,60 @@
             });
 
             markers.push(marker);
+        }
+
+        function drawRoadRoute(points) {
+            if (!points || points.length < 2) return;
+
+            var directionsService = new google.maps.DirectionsService();
+            var startPoint = points[0];
+            var endPoint = points[points.length - 1];
+
+            var middlePoints = points.slice(1, points.length - 1);
+
+            var waypoints = middlePoints.slice(0, 23).map(function (point) {
+                return {
+                    location: point,
+                    stopover: true
+                };
+            });
+
+            directionsService.route(
+                {
+                    origin: startPoint,
+                    destination: endPoint,
+                    waypoints: waypoints,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    optimizeWaypoints: false
+                },
+                function (response, status) {
+                    if (status === "OK" && response) {
+                        routePolyline = new google.maps.DirectionsRenderer({
+                            map: map,
+                            directions: response,
+                            suppressMarkers: true,
+                            preserveViewport: true,
+                            polylineOptions: {
+                                strokeColor: "#ff0000",
+                                strokeOpacity: 1.0,
+                                strokeWeight: 6
+                            }
+                        });
+                    } else {
+                        console.log("Directions route failed:", status);
+
+                        routePolyline = new google.maps.Polyline({
+                            path: points,
+                            geodesic: true,
+                            strokeColor: "#ff0000",
+                            strokeOpacity: 1.0,
+                            strokeWeight: 6
+                        });
+
+                        routePolyline.setMap(map);
+                    }
+                }
+            );
         }
 
         function viewRoute(bookingId) {
@@ -322,6 +467,7 @@
                     });
 
                     var distanceKm = calculateDistanceKm(points);
+
                     updateSummary(res.summary, distanceKm);
 
                     points.forEach(function (point, index) {
@@ -352,58 +498,6 @@
                     alert("Error loading route points.");
                 }
             });
-        }
-        function drawRoadRoute(points) {
-            if (!points || points.length < 2) return;
-
-            var directionsService = new google.maps.DirectionsService();
-
-            var startPoint = points[0];
-            var endPoint = points[points.length - 1];
-
-            var middlePoints = points.slice(1, points.length - 1);
-
-            var waypoints = middlePoints.slice(0, 23).map(function (point) {
-                return {
-                    location: point,
-                    stopover: true
-                };
-            });
-
-            directionsService.route(
-                {
-                    origin: startPoint,
-                    destination: endPoint,
-                    waypoints: waypoints,
-                    travelMode: google.maps.TravelMode.DRIVING,
-                    optimizeWaypoints: false
-                },
-                function (response, status) {
-                    if (status === "OK" && response) {
-                        routePolyline = new google.maps.DirectionsRenderer({
-                            map: map,
-                            directions: response,
-                            suppressMarkers: true,
-                            preserveViewport: true,
-                            polylineOptions: {
-                                strokeOpacity: 1.0,
-                                strokeWeight: 5
-                            }
-                        });
-                    } else {
-                        console.log("Directions route failed:", status);
-
-                        routePolyline = new google.maps.Polyline({
-                            path: points,
-                            geodesic: true,
-                            strokeOpacity: 1.0,
-                            strokeWeight: 5
-                        });
-
-                        routePolyline.setMap(map);
-                    }
-                }
-            );
         }
 
         function reloadTable() {
