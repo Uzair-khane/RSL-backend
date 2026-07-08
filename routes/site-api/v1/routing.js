@@ -11,6 +11,7 @@ const auth = require('./auth');
 const payment = require('./payment');
 const tracking = require('./tracking');
 const safety = require('./safety');
+const ai = require("./ai");
 // USE
 router.use(`${baseUrl}/booking`, booking);
 router.use(`${baseUrl}/general`, general);
@@ -18,5 +19,5 @@ router.use(`${baseUrl}/auth`, auth);
 router.use(`${baseUrl}/payment`, payment);
 router.use(`${baseUrl}/tracking`, tracking);
 router.use(`${baseUrl}/safety`, safety);
-
+router.use(`${baseUrl}/ai`, ai);
 module.exports = router;
