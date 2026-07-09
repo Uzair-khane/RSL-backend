@@ -1,6 +1,7 @@
 const Bookings = require("../../../models/booking");
 const Cars = require("../../../models/car");
 const Price = require("../../../models/price");
+const AiRecommendationLog = require("../../../models/ai_recommendation_log");
 
 /**
  * Current database meaning:
@@ -117,13 +118,40 @@ async function getAvailableCarsWithPrices() {
     return result;
 }
 
+async function saveRecommendationLog(data) {
+    try {
+        await AiRecommendationLog.create({
+            email: data.email,
+            ride_type: data.ride_type,
+            from_location: data.from_location,
+            to_location: data.to_location,
+            recommendation_type: data.recommendation_type,
+            recommended_car_id: data.recommended_car_id,
+            recommended_car_title: data.recommended_car_title,
+            confidence: data.confidence,
+            reasons: JSON.stringify(data.reasons || []),
+            previous_bookings_count: data.previous_bookings_count || 0,
+        });
+    } catch (error) {
+        console.error("AI recommendation log save error:", error.message);
+    }
+}
+
 /**
  * Request-based fallback scoring for new customers.
  * This avoids always returning the first/cheapest car.
  */
-function scoreFallbackCars(carsWithPrices, rideType, email, fromLocation, toLocation) {
+function scoreFallbackCars(
+    carsWithPrices,
+    rideType,
+    email,
+    fromLocation,
+    toLocation
+) {
     const priceField =
-        rideType === "pr_km" || rideType === "per_km" ? "km_price" : "hourly_price";
+        rideType === "pr_km" || rideType === "per_km"
+            ? "km_price"
+            : "hourly_price";
 
     const emailHash = hashString(email);
     const locationHash = hashString(`${fromLocation}-${toLocation}`);
@@ -179,7 +207,9 @@ function scoreFallbackCars(carsWithPrices, rideType, email, fromLocation, toLoca
              * Different email/location combinations produce different recommendations.
              * This prevents same recommendation for every new customer.
              */
-            const diversityScore = (emailHash + locationHash + car.id * 7 + index * 3) % 22;
+            const diversityScore =
+                (emailHash + locationHash + car.id * 7 + index * 3) % 22;
+
             score += diversityScore;
             reasons.push("Selected using request-based vehicle matching");
 
@@ -242,18 +272,33 @@ const recommendRide = async (req, res) => {
 
                 if (!recommendedPrice) continue;
 
+                const responseData = {
+                    recommendation_type: "history_based",
+                    recommended_car: recommendedCar,
+                    recommended_price: recommendedPrice,
+                    recommended_ride_type: selectedRideType,
+                    confidence: Math.min(95, 65 + match.score),
+                    reasons: [...new Set(match.reasons)],
+                    previous_bookings_count: previousBookings.length,
+                };
+
+                await saveRecommendationLog({
+                    email,
+                    ride_type: selectedRideType,
+                    from_location,
+                    to_location,
+                    recommendation_type: responseData.recommendation_type,
+                    recommended_car_id: recommendedCar.id,
+                    recommended_car_title: recommendedCar.title,
+                    confidence: responseData.confidence,
+                    reasons: responseData.reasons,
+                    previous_bookings_count: previousBookings.length,
+                });
+
                 return res.send({
                     success: true,
                     message: "AI-assisted ride recommendation generated successfully.",
-                    data: {
-                        recommendation_type: "history_based",
-                        recommended_car: recommendedCar,
-                        recommended_price: recommendedPrice,
-                        recommended_ride_type: selectedRideType,
-                        confidence: Math.min(95, 65 + match.score),
-                        reasons: [...new Set(match.reasons)],
-                        previous_bookings_count: previousBookings.length,
-                    },
+                    data: responseData,
                 });
             }
         }
@@ -287,18 +332,34 @@ const recommendRide = async (req, res) => {
             });
         }
 
+        const responseData = {
+            recommendation_type: "request_based",
+            recommended_car: best.car,
+            recommended_price: best.price,
+            recommended_ride_type: selectedRideType,
+            confidence: Math.min(90, best.score),
+            reasons: [...new Set(best.reasons)],
+            previous_bookings_count: previousBookings.length || 0,
+        };
+
+        await saveRecommendationLog({
+            email,
+            ride_type: selectedRideType,
+            from_location,
+            to_location,
+            recommendation_type: responseData.recommendation_type,
+            recommended_car_id: best.car.id,
+            recommended_car_title: best.car.title,
+            confidence: responseData.confidence,
+            reasons: responseData.reasons,
+            previous_bookings_count: previousBookings.length || 0,
+        });
+
         return res.send({
             success: true,
-            message: "AI-assisted request-based recommendation generated successfully.",
-            data: {
-                recommendation_type: "request_based",
-                recommended_car: best.car,
-                recommended_price: best.price,
-                recommended_ride_type: selectedRideType,
-                confidence: Math.min(90, best.score),
-                reasons: [...new Set(best.reasons)],
-                previous_bookings_count: previousBookings.length || 0,
-            },
+            message:
+                "AI-assisted request-based recommendation generated successfully.",
+            data: responseData,
         });
     } catch (error) {
         return res.send({
