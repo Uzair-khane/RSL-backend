@@ -28,6 +28,7 @@ const accounts_history = require("./account-history");
 const payments = require("./payments");
 const safetyAlertsRoute = require("./safety_alerts");
 const offlineTrackingRoute = require("./offline_tracking");
+const aiRecommendationLogs = require("./ai-recommendation-logs");
 
 // USE
 router.use(`${baseUrl}/auth`, login);
@@ -52,5 +53,6 @@ router.use(`${baseUrl}/accounts-history`, isAdminAuth, accounts_history);
 router.use(`${baseUrl}/payments`, isAdminAuth, payments);
 router.use(`${baseUrl}/safety-alerts`, isAdminAuth, safetyAlertsRoute);
 router.use(`${baseUrl}/offline-tracking`, offlineTrackingRoute);
+router.use(`${baseUrl}/ai-recommendation-logs`, isAdminAuth, aiRecommendationLogs);
 
 module.exports = router;

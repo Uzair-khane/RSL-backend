@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%- include ('../partials/head') %>
+
+    <body class="app sidebar-mini ltr">
+        <!-- PAGE -->
+        <div class="page">
+            <div class="page-main">
+                <!-- app-Header -->
+                <%- include ('../partials/header') %>
+                    <!-- /app-Header -->
+
+                    <!--APP-SIDEBAR-->
+                    <%- include ('../partials/sidebar') %>
+
+                        <!--app-content open-->
+                        <div class="main-content app-content mt-0">
+                            <div class="side-app">
+                                <!-- CONTAINER -->
+                                <div class="main-container container-fluid">
+                                    <!-- PAGE-HEADER -->
+                                    <div class="page-header">
+                                        <h1 class="page-title">
+                                            <%= pageTitle %>
+                                        </h1>
+
+                                        <div>
+                                            <ol class="breadcrumb">
+                                                <li class="breadcrumb-item">
+                                                    <a href="/ap/home">Home</a>
+                                                </li>
+
+                                                <li class="breadcrumb-item active" aria-current="page">
+                                                    <%= pageTitle %>
+                                                </li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                    <!-- PAGE-HEADER END -->
+
+                                    <!-- ROW -->
+                                    <div class="row">
+                                        <div class="col-md-12 col-lg-12">
+                                            <div class="card">
+                                                <div class="card-header row justify-content-between align-items-center">
+                                                    <div class="col">
+                                                        <h5 class="mb-3">
+                                                            <%= pageTitle %> List
+                                                        </h5>
+                                                    </div>
+
+                                                    <div class="col">
+                                                        <select class="form-control select2-show-search type-dropdown"
+                                                            id="filter_recommendation_type"
+                                                            name="filter_recommendation_type">
+                                                            <option value="0" selected>
+                                                                All Recommendation Types
+                                                            </option>
+                                                            <option value="history_based">History Based</option>
+                                                            <option value="request_based">Request Based</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col">
+                                                        <select class="form-control select2-show-search type-dropdown"
+                                                            id="filter_ride_type" name="filter_ride_type">
+                                                            <option value="0" selected>All Ride Types</option>
+                                                            <option value="per_km">Per KM</option>
+                                                            <option value="pr_km">PR KM</option>
+                                                            <option value="hourly">Hourly</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-auto">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                id="auto_refresh_list" />
+
+                                                            <label class="form-check-label" for="auto_refresh_list">
+                                                                Auto Refresh
+                                                            </label>
+
+                                                            <span id="auto_fetch_spinner"
+                                                                style="display: none; margin-left: 8px"
+                                                                class="spinner-border spinner-border-sm text-primary"
+                                                                role="status"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <% if (successFlash && successFlash.length> 0) { %>
+                                                        <div class="alert alert-success">
+                                                            <%= successFlash %>
+                                                        </div>
+                                                        <% } %>
+
+                                                            <% if (errorFlash && errorFlash.length> 0) { %>
+                                                                <div class="alert alert-danger">
+                                                                    <%- errorFlash %>
+                                                                </div>
+                                                                <% } %>
+
+                                                                    <div class="alert alert-info">
+                                                                        This page shows AI-assisted vehicle
+                                                                        recommendation logs
+                                                                        generated from the customer booking form.
+                                                                    </div>
+
+                                                                    <div class="table-responsive">
+                                                                        <table id="table1"
+                                                                            class="table table-sm table-hover table-condensed"
+                                                                            width="100%">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 1%">#</th>
+                                                                                    <th>Email</th>
+                                                                                    <th>Ride Type</th>
+                                                                                    <th>Recommendation Type</th>
+                                                                                    <th>Recommended Car</th>
+                                                                                    <th>Confidence</th>
+                                                                                    <th>Previous Bookings</th>
+                                                                                    <th>Reasons</th>
+                                                                                    <th>Date</th>
+                                                                                </tr>
+                                                                            </thead>
+
+                                                                            <tbody></tbody>
+                                                                        </table>
+                                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- ROW END -->
+                                </div>
+                                <!-- CONTAINER END -->
+                            </div>
+                        </div>
+                        <!--app-content close-->
+            </div>
+
+            <!-- FOOTER -->
+            <%- include ('../partials/footer') %>
+                <!-- FOOTER END -->
+        </div>
+
+        <!-- BACK-TO-TOP -->
+        <a href="#top" id="back-to-top">
+            <i class="fa fa-angle-up"></i>
+        </a>
+
+        <%- include ('../partials/footer-script') %>
+    </body>
+
+    <script>
+        const actionUrl = "<%= actionUrl %>";
+
+        $(function () {
+            let table = $("#table1").DataTable({
+                searching: true,
+                paging: true,
+                responsive: true,
+                select: true,
+                order: [[0, "desc"]],
+                pageLength: 30,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: `${actionUrl}/list`,
+                    type: "POST",
+                    data: function (d) {
+                        d.filter_recommendation_type = $(
+                            "#filter_recommendation_type"
+                        ).val();
+
+                        d.filter_ride_type = $("#filter_ride_type").val();
+                    },
+                },
+                columnDefs: [
+                    {
+                        searchable: true,
+                        orderable: false,
+                        defaultContent: "-",
+                        targets: "_all",
+                    },
+                    {
+                        targets: [5],
+                        render: function (data) {
+                            return `<span class="badge bg-success">${data}</span>`;
+                        },
+                    },
+                    {
+                        targets: [3],
+                        render: function (data) {
+                            if (data === "history_based") {
+                                return `<span class="badge bg-primary">History Based</span>`;
+                            }
+
+                            if (data === "request_based") {
+                                return `<span class="badge bg-info">Request Based</span>`;
+                            }
+
+                            return data || "-";
+                        },
+                    },
+                    {
+                        targets: [7],
+                        render: function (data) {
+                            return `<div style="min-width: 220px; white-space: normal;">${data || "-"
+                                }</div>`;
+                        },
+                    },
+                ],
+                dom: "Bfrtip",
+            });
+
+            $(document).on("change keyup", ".type-dropdown", function () {
+                table.ajax.reload();
+            });
+
+            setInterval(() => {
+                if ($("#auto_refresh_list").is(":checked")) {
+                    table.ajax.reload();
+                }
+            }, 10000);
+
+            $(document).on("click", "#auto_refresh_list", function () {
+                if ($("#auto_refresh_list").is(":checked")) {
+                    $("#auto_fetch_spinner").css("display", "inline-block");
+                } else {
+                    $("#auto_fetch_spinner").css("display", "none");
+                }
+            });
+        });
+    </script>
+
+</html>
