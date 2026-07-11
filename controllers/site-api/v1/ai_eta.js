@@ -1,7 +1,14 @@
+const axios = require("axios");
+
 const Booking = require("../../../models/booking");
 const DriverLocation = require("../../../models/driver_location");
 
-const DEFAULT_AVG_SPEED_KMPH = Number(process.env.AI_ETA_AVG_SPEED_KMPH || 35);
+const DEFAULT_AVG_SPEED_KMPH = Number(process.env.AI_ETA_AVG_SPEED_KMPH || 22);
+
+const GOOGLE_MAPS_API_KEY =
+    process.env.GOOGLE_MAP_API_KEY ||
+    process.env.GOOGLE_MAPS_API_KEY ||
+    "";
 
 exports.predictEta = async (req, res) => {
     try {
@@ -115,7 +122,7 @@ exports.predictEta = async (req, res) => {
             });
         }
 
-        const distanceKm = calculateDistanceKm(
+        const straightDistanceKm = calculateDistanceKm(
             driverLat,
             driverLng,
             pickupLat,
@@ -134,10 +141,20 @@ exports.predictEta = async (req, res) => {
             ])
         );
 
+        const routeEta = await getGoogleMapsEtaOrFallback({
+            driverLat,
+            driverLng,
+            pickupLat,
+            pickupLng,
+            straightDistanceKm,
+        });
+
         const etaResult = generateAiEtaResult({
-            distanceKm,
+            etaMinutes: routeEta.etaMinutes,
+            distanceKm: routeEta.distanceKm,
+            straightDistanceKm,
+            etaSource: routeEta.etaSource,
             locationAgeMinutes,
-            avgSpeedKmph: DEFAULT_AVG_SPEED_KMPH,
             pickupLatProvided: Boolean(pickup_lat),
             pickupLngProvided: Boolean(pickup_lng),
             driverLatProvided: Boolean(driver_lat),
@@ -151,10 +168,12 @@ exports.predictEta = async (req, res) => {
             driver_id: Number(driver_id),
             estimated_arrival_minutes: etaResult.estimatedArrivalMinutes,
             eta_range: etaResult.etaRange,
-            distance_km: Number(distanceKm.toFixed(2)),
+            distance_km: Number(routeEta.distanceKm.toFixed(2)),
+            straight_distance_km: Number(straightDistanceKm.toFixed(2)),
             confidence: etaResult.confidence,
             status: etaResult.status,
             reasons: etaResult.reasons,
+            eta_source: routeEta.etaSource,
             location_source: latestLocation ? "database" : "request_body",
             driver_location: {
                 latitude: driverLat,
@@ -177,36 +196,110 @@ exports.predictEta = async (req, res) => {
     }
 };
 
+async function getGoogleMapsEtaOrFallback({
+    driverLat,
+    driverLng,
+    pickupLat,
+    pickupLng,
+    straightDistanceKm,
+}) {
+    if (GOOGLE_MAPS_API_KEY) {
+        try {
+            const response = await axios.get(
+                "https://maps.googleapis.com/maps/api/distancematrix/json",
+                {
+                    params: {
+                        origins: `${driverLat},${driverLng}`,
+                        destinations: `${pickupLat},${pickupLng}`,
+                        mode: "driving",
+                        departure_time: "now",
+                        traffic_model: "best_guess",
+                        key: GOOGLE_MAPS_API_KEY,
+                    },
+                    timeout: 8000,
+                }
+            );
+
+            const element = response.data?.rows?.[0]?.elements?.[0];
+
+            if (element && element.status === "OK") {
+                const durationSeconds =
+                    element.duration_in_traffic?.value ||
+                    element.duration?.value;
+
+                const distanceMeters = element.distance?.value;
+
+                if (durationSeconds && distanceMeters) {
+                    return {
+                        etaMinutes: Math.max(1, Math.ceil(durationSeconds / 60)),
+                        distanceKm: distanceMeters / 1000,
+                        etaSource: "google_maps_driving",
+                    };
+                }
+            }
+
+            console.log("Google Maps ETA response was not OK:", response.data);
+        } catch (error) {
+            console.log("Google Maps ETA failed. Fallback used:", error.message);
+        }
+    } else {
+        console.log("Google Maps API key missing. Fallback ETA used.");
+    }
+
+    return getFallbackEta(straightDistanceKm);
+}
+
+function getFallbackEta(straightDistanceKm) {
+    const estimatedRoadDistanceKm = straightDistanceKm * 1.7;
+
+    let trafficBufferMinutes = 0;
+
+    if (estimatedRoadDistanceKm <= 3) {
+        trafficBufferMinutes = 4;
+    } else if (estimatedRoadDistanceKm <= 7) {
+        trafficBufferMinutes = 8;
+    } else if (estimatedRoadDistanceKm <= 15) {
+        trafficBufferMinutes = 12;
+    } else {
+        trafficBufferMinutes = 18;
+    }
+
+    const baseEtaMinutes = Math.ceil(
+        (estimatedRoadDistanceKm / DEFAULT_AVG_SPEED_KMPH) * 60
+    );
+
+    return {
+        etaMinutes: Math.max(5, baseEtaMinutes + trafficBufferMinutes),
+        distanceKm: estimatedRoadDistanceKm,
+        etaSource: "fallback_conservative",
+    };
+}
+
 function generateAiEtaResult({
+    etaMinutes,
     distanceKm,
+    straightDistanceKm,
+    etaSource,
     locationAgeMinutes,
-    avgSpeedKmph,
     pickupLatProvided,
     pickupLngProvided,
     driverLatProvided,
     driverLngProvided,
 }) {
-    let confidence = 70;
+    let confidence = etaSource === "google_maps_driving" ? 85 : 65;
     const reasons = [];
 
-    const baseEtaMinutes = Math.ceil((distanceKm / avgSpeedKmph) * 60);
+    const estimatedArrivalMinutes = Math.max(1, etaMinutes);
 
-    let trafficBuffer = 0;
-
-    if (distanceKm <= 3) {
-        trafficBuffer = 3;
-    } else if (distanceKm <= 10) {
-        trafficBuffer = 6;
-    } else if (distanceKm <= 20) {
-        trafficBuffer = 10;
+    if (etaSource === "google_maps_driving") {
+        reasons.push("ETA calculated using Google Maps driving route data");
+        reasons.push("Actual road distance was used instead of straight-line distance");
     } else {
-        trafficBuffer = 15;
+        reasons.push("ETA calculated using conservative fallback route estimation");
+        reasons.push("Straight-line distance was adjusted to estimate road distance");
     }
 
-    const estimatedArrivalMinutes = Math.max(1, baseEtaMinutes + trafficBuffer);
-
-    reasons.push("ETA calculated using driver GPS coordinates");
-    reasons.push("Distance calculated between driver location and pickup point");
+    reasons.push("Driver and pickup coordinates were used for ETA prediction");
     reasons.push("Traffic buffer added using AI-assisted scoring rules");
 
     if (pickupLatProvided && pickupLngProvided) {
@@ -225,10 +318,10 @@ function generateAiEtaResult({
 
     if (locationAgeMinutes !== null && locationAgeMinutes !== undefined) {
         if (locationAgeMinutes <= 2) {
-            confidence += 15;
+            confidence += 10;
             reasons.push("Driver location is recently updated");
         } else if (locationAgeMinutes <= 10) {
-            confidence += 5;
+            confidence += 3;
             reasons.push("Driver location is acceptable but not very recent");
         } else if (locationAgeMinutes <= 30) {
             confidence -= 10;
@@ -241,22 +334,25 @@ function generateAiEtaResult({
 
     let status = "normal";
 
-    if (estimatedArrivalMinutes <= 10) {
+    if (estimatedArrivalMinutes <= 8) {
         status = "nearby";
-        confidence += 5;
         reasons.push("Driver is close to pickup location");
     } else if (estimatedArrivalMinutes <= 25) {
         status = "normal";
         reasons.push("Driver is at a moderate distance from pickup location");
     } else {
         status = "delayed";
-        confidence -= 10;
+        confidence -= 5;
         reasons.push("Driver may take longer to reach pickup location");
     }
 
-    if (distanceKm > 25) {
-        confidence -= 10;
+    if (distanceKm > 20) {
+        confidence -= 8;
         reasons.push("Long pickup distance reduced ETA confidence");
+    }
+
+    if (straightDistanceKm > 0 && distanceKm / straightDistanceKm > 2) {
+        reasons.push("Road route is significantly longer than straight-line distance");
     }
 
     confidence = Math.max(40, Math.min(confidence, 95));
@@ -264,8 +360,8 @@ function generateAiEtaResult({
     return {
         estimatedArrivalMinutes,
         etaRange: {
-            min_minutes: Math.max(1, estimatedArrivalMinutes - 3),
-            max_minutes: estimatedArrivalMinutes + 5,
+            min_minutes: Math.max(1, estimatedArrivalMinutes - 4),
+            max_minutes: estimatedArrivalMinutes + 7,
         },
         confidence,
         status,
