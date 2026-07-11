@@ -5,7 +5,14 @@ const DEFAULT_AVG_SPEED_KMPH = Number(process.env.AI_ETA_AVG_SPEED_KMPH || 35);
 
 exports.predictEta = async (req, res) => {
     try {
-        const { booking_id, driver_id, pickup_lat, pickup_lng } = req.body;
+        const {
+            booking_id,
+            driver_id,
+            pickup_lat,
+            pickup_lng,
+            driver_lat,
+            driver_lng,
+        } = req.body;
 
         if (!booking_id || !driver_id) {
             return res.status(400).json({
@@ -25,7 +32,7 @@ exports.predictEta = async (req, res) => {
 
         const bookingData = toPlainObject(booking);
 
-        const latestLocation = await DriverLocation.findOne({
+        let latestLocation = await DriverLocation.findOne({
             where: buildDriverLocationWhere(DriverLocation, {
                 booking_id,
                 driver_id,
@@ -34,15 +41,18 @@ exports.predictEta = async (req, res) => {
         });
 
         if (!latestLocation) {
-            return res.status(404).json({
-                success: false,
-                message: "Driver latest location not found",
+            latestLocation = await DriverLocation.findOne({
+                where: buildDriverOnlyWhere(DriverLocation, {
+                    driver_id,
+                }),
+                order: buildLatestLocationOrder(DriverLocation),
             });
         }
 
-        const locationData = toPlainObject(latestLocation);
+        const locationData = latestLocation ? toPlainObject(latestLocation) : {};
 
         const driverLat = toNumberOrNull(
+            driver_lat ||
             getFirstValue(locationData, [
                 "latitude",
                 "lat",
@@ -53,6 +63,7 @@ exports.predictEta = async (req, res) => {
         );
 
         const driverLng = toNumberOrNull(
+            driver_lng ||
             getFirstValue(locationData, [
                 "longitude",
                 "lng",
@@ -91,7 +102,8 @@ exports.predictEta = async (req, res) => {
         if (isMissingCoordinate(driverLat) || isMissingCoordinate(driverLng)) {
             return res.status(400).json({
                 success: false,
-                message: "Driver latitude/longitude is missing in driver_locations table",
+                message:
+                    "Driver latitude/longitude is missing. Update driver location first or send driver_lat and driver_lng in request body.",
             });
         }
 
@@ -128,6 +140,8 @@ exports.predictEta = async (req, res) => {
             avgSpeedKmph: DEFAULT_AVG_SPEED_KMPH,
             pickupLatProvided: Boolean(pickup_lat),
             pickupLngProvided: Boolean(pickup_lng),
+            driverLatProvided: Boolean(driver_lat),
+            driverLngProvided: Boolean(driver_lng),
         });
 
         return res.status(200).json({
@@ -141,6 +155,7 @@ exports.predictEta = async (req, res) => {
             confidence: etaResult.confidence,
             status: etaResult.status,
             reasons: etaResult.reasons,
+            location_source: latestLocation ? "database" : "request_body",
             driver_location: {
                 latitude: driverLat,
                 longitude: driverLng,
@@ -149,7 +164,7 @@ exports.predictEta = async (req, res) => {
                 latitude: pickupLat,
                 longitude: pickupLng,
             },
-            location_age_minutes: locationAgeMinutes,
+            location_age_minutes: latestLocation ? locationAgeMinutes : null,
         });
     } catch (error) {
         console.error("AI ETA Prediction Error:", error);
@@ -168,6 +183,8 @@ function generateAiEtaResult({
     avgSpeedKmph,
     pickupLatProvided,
     pickupLngProvided,
+    driverLatProvided,
+    driverLngProvided,
 }) {
     let confidence = 70;
     const reasons = [];
@@ -188,7 +205,7 @@ function generateAiEtaResult({
 
     const estimatedArrivalMinutes = Math.max(1, baseEtaMinutes + trafficBuffer);
 
-    reasons.push("ETA calculated using latest driver GPS location");
+    reasons.push("ETA calculated using driver GPS coordinates");
     reasons.push("Distance calculated between driver location and pickup point");
     reasons.push("Traffic buffer added using AI-assisted scoring rules");
 
@@ -199,18 +216,27 @@ function generateAiEtaResult({
         reasons.push("Pickup coordinates were taken from booking record");
     }
 
-    if (locationAgeMinutes <= 2) {
-        confidence += 15;
-        reasons.push("Driver location is recently updated");
-    } else if (locationAgeMinutes <= 10) {
-        confidence += 5;
-        reasons.push("Driver location is acceptable but not very recent");
-    } else if (locationAgeMinutes <= 30) {
-        confidence -= 10;
-        reasons.push("Driver location is old, ETA may be less accurate");
+    if (driverLatProvided && driverLngProvided) {
+        confidence -= 5;
+        reasons.push("Driver coordinates were provided manually for testing");
     } else {
-        confidence -= 25;
-        reasons.push("Driver location is outdated, ETA confidence reduced");
+        reasons.push("Driver coordinates were taken from latest tracking record");
+    }
+
+    if (locationAgeMinutes !== null && locationAgeMinutes !== undefined) {
+        if (locationAgeMinutes <= 2) {
+            confidence += 15;
+            reasons.push("Driver location is recently updated");
+        } else if (locationAgeMinutes <= 10) {
+            confidence += 5;
+            reasons.push("Driver location is acceptable but not very recent");
+        } else if (locationAgeMinutes <= 30) {
+            confidence -= 10;
+            reasons.push("Driver location is old, ETA may be less accurate");
+        } else {
+            confidence -= 25;
+            reasons.push("Driver location is outdated, ETA confidence reduced");
+        }
     }
 
     let status = "normal";
@@ -281,8 +307,9 @@ function getLocationAgeMinutes(createdAt) {
     }
 
     const currentTime = new Date().getTime();
+    const ageMinutes = Math.floor((currentTime - locationTime) / 60000);
 
-    return Math.floor((currentTime - locationTime) / 60000);
+    return Math.max(0, ageMinutes);
 }
 
 function buildDriverLocationWhere(model, { booking_id, driver_id }) {
@@ -306,6 +333,22 @@ function buildDriverLocationWhere(model, { booking_id, driver_id }) {
 
     if (bookingField) {
         where[bookingField] = booking_id;
+    }
+
+    return where;
+}
+
+function buildDriverOnlyWhere(model, { driver_id }) {
+    const where = {};
+
+    const driverField = getExistingModelField(model, [
+        "driver_id",
+        "driverId",
+        "driver",
+    ]);
+
+    if (driverField) {
+        where[driverField] = driver_id;
     }
 
     return where;
