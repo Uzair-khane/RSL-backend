@@ -10,6 +10,11 @@ const GOOGLE_MAPS_API_KEY =
     process.env.GOOGLE_MAPS_API_KEY ||
     "";
 
+const OFFICE_LOCATION = {
+    latitude: Number(process.env.RSL_OFFICE_LAT || 34.0008965),
+    longitude: Number(process.env.RSL_OFFICE_LNG || 71.4986689),
+};
+
 exports.predictEta = async (req, res) => {
     try {
         const {
@@ -19,6 +24,7 @@ exports.predictEta = async (req, res) => {
             pickup_lng,
             driver_lat,
             driver_lng,
+            demo_mode,
         } = req.body;
 
         if (!booking_id || !driver_id) {
@@ -58,8 +64,10 @@ exports.predictEta = async (req, res) => {
 
         const locationData = latestLocation ? toPlainObject(latestLocation) : {};
 
-        const driverLat = toNumberOrNull(
-            driver_lat ||
+        const requestDriverLat = toNumberOrNull(driver_lat);
+        const requestDriverLng = toNumberOrNull(driver_lng);
+
+        const databaseDriverLat = toNumberOrNull(
             getFirstValue(locationData, [
                 "latitude",
                 "lat",
@@ -69,8 +77,7 @@ exports.predictEta = async (req, res) => {
             ])
         );
 
-        const driverLng = toNumberOrNull(
-            driver_lng ||
+        const databaseDriverLng = toNumberOrNull(
             getFirstValue(locationData, [
                 "longitude",
                 "lng",
@@ -79,6 +86,18 @@ exports.predictEta = async (req, res) => {
                 "location_lng",
             ])
         );
+
+        const resolvedDriverLocation = resolveDriverLocation({
+            requestDriverLat,
+            requestDriverLng,
+            databaseDriverLat,
+            databaseDriverLng,
+            demoMode: isTruthy(demo_mode),
+        });
+
+        const driverLat = resolvedDriverLocation.latitude;
+        const driverLng = resolvedDriverLocation.longitude;
+        const driverLocationSource = resolvedDriverLocation.source;
 
         const pickupLat = toNumberOrNull(
             pickup_lat ||
@@ -106,19 +125,11 @@ exports.predictEta = async (req, res) => {
             ])
         );
 
-        if (isMissingCoordinate(driverLat) || isMissingCoordinate(driverLng)) {
+        if (!isValidCoordinatePair(pickupLat, pickupLng)) {
             return res.status(400).json({
                 success: false,
                 message:
-                    "Driver latitude/longitude is missing. Update driver location first or send driver_lat and driver_lng in request body.",
-            });
-        }
-
-        if (isMissingCoordinate(pickupLat) || isMissingCoordinate(pickupLng)) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Pickup latitude/longitude is missing. Send pickup_lat and pickup_lng in request body.",
+                    "Pickup latitude/longitude is missing or invalid. Send pickup_lat and pickup_lng in request body.",
             });
         }
 
@@ -129,17 +140,20 @@ exports.predictEta = async (req, res) => {
             pickupLng
         );
 
-        const locationAgeMinutes = getLocationAgeMinutes(
-            getFirstValue(locationData, [
-                "created_at",
-                "createdAt",
-                "updated_at",
-                "updatedAt",
-                "timestamp",
-                "location_time",
-                "locationTime",
-            ])
-        );
+        const locationAgeMinutes =
+            driverLocationSource === "database"
+                ? getLocationAgeMinutes(
+                    getFirstValue(locationData, [
+                        "created_at",
+                        "createdAt",
+                        "updated_at",
+                        "updatedAt",
+                        "timestamp",
+                        "location_time",
+                        "locationTime",
+                    ])
+                )
+                : null;
 
         const routeEta = await getGoogleMapsEtaOrFallback({
             driverLat,
@@ -155,10 +169,8 @@ exports.predictEta = async (req, res) => {
             straightDistanceKm,
             etaSource: routeEta.etaSource,
             locationAgeMinutes,
-            pickupLatProvided: Boolean(pickup_lat),
-            pickupLngProvided: Boolean(pickup_lng),
-            driverLatProvided: Boolean(driver_lat),
-            driverLngProvided: Boolean(driver_lng),
+            pickupLatProvided: Boolean(pickup_lat && pickup_lng),
+            driverLocationSource,
         });
 
         return res.status(200).json({
@@ -174,7 +186,9 @@ exports.predictEta = async (req, res) => {
             status: etaResult.status,
             reasons: etaResult.reasons,
             eta_source: routeEta.etaSource,
-            location_source: latestLocation ? "database" : "request_body",
+            location_source: driverLocationSource,
+            driver_location_source: driverLocationSource,
+            is_demo_location: driverLocationSource === "office_demo_default",
             driver_location: {
                 latitude: driverLat,
                 longitude: driverLng,
@@ -183,7 +197,8 @@ exports.predictEta = async (req, res) => {
                 latitude: pickupLat,
                 longitude: pickupLng,
             },
-            location_age_minutes: latestLocation ? locationAgeMinutes : null,
+            office_location: OFFICE_LOCATION,
+            location_age_minutes: locationAgeMinutes,
         });
     } catch (error) {
         console.error("AI ETA Prediction Error:", error);
@@ -196,6 +211,36 @@ exports.predictEta = async (req, res) => {
     }
 };
 
+function resolveDriverLocation({
+    requestDriverLat,
+    requestDriverLng,
+    databaseDriverLat,
+    databaseDriverLng,
+    demoMode,
+}) {
+    if (isValidCoordinatePair(requestDriverLat, requestDriverLng)) {
+        return {
+            latitude: requestDriverLat,
+            longitude: requestDriverLng,
+            source: "request_body",
+        };
+    }
+
+    if (isValidCoordinatePair(databaseDriverLat, databaseDriverLng)) {
+        return {
+            latitude: databaseDriverLat,
+            longitude: databaseDriverLng,
+            source: "database",
+        };
+    }
+
+    return {
+        latitude: OFFICE_LOCATION.latitude,
+        longitude: OFFICE_LOCATION.longitude,
+        source: demoMode ? "office_demo_default" : "office_default",
+    };
+}
+
 async function getGoogleMapsEtaOrFallback({
     driverLat,
     driverLng,
@@ -203,6 +248,14 @@ async function getGoogleMapsEtaOrFallback({
     pickupLng,
     straightDistanceKm,
 }) {
+    if (straightDistanceKm <= 0.05) {
+        return {
+            etaMinutes: 0,
+            distanceKm: 0,
+            etaSource: "arrived",
+        };
+    }
+
     if (GOOGLE_MAPS_API_KEY) {
         try {
             const response = await axios.get(
@@ -224,15 +277,21 @@ async function getGoogleMapsEtaOrFallback({
 
             if (element && element.status === "OK") {
                 const durationSeconds =
-                    element.duration_in_traffic?.value ||
+                    element.duration_in_traffic?.value ??
                     element.duration?.value;
 
                 const distanceMeters = element.distance?.value;
 
-                if (durationSeconds && distanceMeters) {
+                if (
+                    Number.isFinite(Number(durationSeconds)) &&
+                    Number.isFinite(Number(distanceMeters))
+                ) {
                     return {
-                        etaMinutes: Math.max(1, Math.ceil(durationSeconds / 60)),
-                        distanceKm: distanceMeters / 1000,
+                        etaMinutes: Math.max(
+                            0,
+                            Math.ceil(Number(durationSeconds) / 60)
+                        ),
+                        distanceKm: Number(distanceMeters) / 1000,
                         etaSource: "google_maps_driving",
                     };
                 }
@@ -250,7 +309,15 @@ async function getGoogleMapsEtaOrFallback({
 }
 
 function getFallbackEta(straightDistanceKm) {
-    const estimatedRoadDistanceKm = straightDistanceKm * 1.7;
+    if (straightDistanceKm <= 0.05) {
+        return {
+            etaMinutes: 0,
+            distanceKm: 0,
+            etaSource: "arrived",
+        };
+    }
+
+    const estimatedRoadDistanceKm = straightDistanceKm * 1.5;
 
     let trafficBufferMinutes = 0;
 
@@ -269,7 +336,7 @@ function getFallbackEta(straightDistanceKm) {
     );
 
     return {
-        etaMinutes: Math.max(5, baseEtaMinutes + trafficBufferMinutes),
+        etaMinutes: Math.max(1, baseEtaMinutes + trafficBufferMinutes),
         distanceKm: estimatedRoadDistanceKm,
         etaSource: "fallback_conservative",
     };
@@ -282,52 +349,74 @@ function generateAiEtaResult({
     etaSource,
     locationAgeMinutes,
     pickupLatProvided,
-    pickupLngProvided,
-    driverLatProvided,
-    driverLngProvided,
+    driverLocationSource,
 }) {
-    let confidence = etaSource === "google_maps_driving" ? 85 : 65;
+    let confidence = etaSource === "google_maps_driving" ? 88 : 68;
     const reasons = [];
 
-    const estimatedArrivalMinutes = Math.max(1, etaMinutes);
+    const estimatedArrivalMinutes = Math.max(0, etaMinutes);
+
+    if (etaSource === "arrived" || distanceKm <= 0.05) {
+        return {
+            estimatedArrivalMinutes: 0,
+            etaRange: {
+                min_minutes: 0,
+                max_minutes: 1,
+            },
+            confidence: 95,
+            status: "arrived",
+            reasons: [
+                "Driver is already at or very close to the pickup location",
+                "Driver and pickup coordinates are almost the same",
+            ],
+        };
+    }
 
     if (etaSource === "google_maps_driving") {
         reasons.push("ETA calculated using Google Maps driving route data");
         reasons.push("Actual road distance was used instead of straight-line distance");
+        reasons.push("Traffic-aware Google Maps driving duration was used");
     } else {
         reasons.push("ETA calculated using conservative fallback route estimation");
         reasons.push("Straight-line distance was adjusted to estimate road distance");
+        reasons.push("Traffic buffer added using AI-assisted scoring rules");
     }
 
     reasons.push("Driver and pickup coordinates were used for ETA prediction");
-    reasons.push("Traffic buffer added using AI-assisted scoring rules");
 
-    if (pickupLatProvided && pickupLngProvided) {
-        confidence += 5;
+    if (pickupLatProvided) {
+        confidence += 4;
         reasons.push("Pickup coordinates were provided directly in the request");
     } else {
         reasons.push("Pickup coordinates were taken from booking record");
     }
 
-    if (driverLatProvided && driverLngProvided) {
-        confidence -= 5;
-        reasons.push("Driver coordinates were provided manually for testing");
-    } else {
+    if (driverLocationSource === "request_body") {
+        confidence += 5;
+        reasons.push("Driver coordinates were provided by the tracking page");
+    } else if (driverLocationSource === "database") {
+        confidence += 4;
         reasons.push("Driver coordinates were taken from latest tracking record");
+    } else if (driverLocationSource === "office_demo_default") {
+        confidence -= 6;
+        reasons.push("Driver coordinates were defaulted to office location for demo mode");
+    } else if (driverLocationSource === "office_default") {
+        confidence -= 10;
+        reasons.push("Driver coordinates were defaulted to office location because live GPS was unavailable");
     }
 
     if (locationAgeMinutes !== null && locationAgeMinutes !== undefined) {
         if (locationAgeMinutes <= 2) {
-            confidence += 10;
+            confidence += 6;
             reasons.push("Driver location is recently updated");
         } else if (locationAgeMinutes <= 10) {
-            confidence += 3;
+            confidence += 2;
             reasons.push("Driver location is acceptable but not very recent");
         } else if (locationAgeMinutes <= 30) {
-            confidence -= 10;
+            confidence -= 8;
             reasons.push("Driver location is old, ETA may be less accurate");
         } else {
-            confidence -= 25;
+            confidence -= 18;
             reasons.push("Driver location is outdated, ETA confidence reduced");
         }
     }
@@ -342,12 +431,12 @@ function generateAiEtaResult({
         reasons.push("Driver is at a moderate distance from pickup location");
     } else {
         status = "delayed";
-        confidence -= 5;
+        confidence -= 4;
         reasons.push("Driver may take longer to reach pickup location");
     }
 
     if (distanceKm > 20) {
-        confidence -= 8;
+        confidence -= 6;
         reasons.push("Long pickup distance reduced ETA confidence");
     }
 
@@ -360,7 +449,7 @@ function generateAiEtaResult({
     return {
         estimatedArrivalMinutes,
         etaRange: {
-            min_minutes: Math.max(1, estimatedArrivalMinutes - 4),
+            min_minutes: Math.max(0, estimatedArrivalMinutes - 4),
             max_minutes: estimatedArrivalMinutes + 7,
         },
         confidence,
@@ -490,6 +579,10 @@ function getFirstValue(object, keys) {
 }
 
 function toNumberOrNull(value) {
+    if (value === null || value === undefined || value === "") {
+        return null;
+    }
+
     const numberValue = Number(value);
 
     if (Number.isNaN(numberValue)) {
@@ -511,6 +604,29 @@ function toPlainObject(record) {
     return record;
 }
 
-function isMissingCoordinate(value) {
-    return value === null || value === undefined || Number.isNaN(Number(value));
+function isValidCoordinatePair(lat, lng) {
+    const latitude = Number(lat);
+    const longitude = Number(lng);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return false;
+    }
+
+    if (latitude < -90 || latitude > 90) {
+        return false;
+    }
+
+    if (longitude < -180 || longitude > 180) {
+        return false;
+    }
+
+    if (latitude === 0 && longitude === 0) {
+        return false;
+    }
+
+    return true;
+}
+
+function isTruthy(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
 }
