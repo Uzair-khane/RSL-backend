@@ -3,17 +3,14 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const Payment = require('../../../models/payment');
 const Bookings = require('../../../models/booking');
-
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { sendEmail } = require('../../../helpers/sendEmail');
 
 /* =====================================================
    CUSTOMER RECEIPT EMAIL
 ===================================================== */
 async function sendReceiptEmail(email, name, amount, bookingId) {
-  const msg = {
+  const result = await sendEmail({
     to: email,
-    from: process.env.SENDGRID_FROM_EMAIL,
     subject: 'RSL — Payment Submitted Successfully!',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
@@ -33,18 +30,19 @@ async function sendReceiptEmail(email, name, amount, bookingId) {
         <p style="color: #999; font-size: 12px;">Real Smart Limousine — Luxury Ride Booking</p>
       </div>
     `
-  };
+  });
 
-  await sgMail.send(msg);
+  if (!result.success) {
+    throw new Error(result.message || 'Customer receipt email failed.');
+  }
 }
 
 /* =====================================================
    ADMIN PAYMENT NOTIFICATION EMAIL
 ===================================================== */
 async function sendAdminNotification(payment, booking) {
-  const msg = {
-    to: process.env.SENDGRID_FROM_EMAIL,
-    from: process.env.SENDGRID_FROM_EMAIL,
+  const result = await sendEmail({
+    to: process.env.ADMIN_ALERT_EMAIL || process.env.EMAIL_USER,
     subject: 'RSL — New Payment Received! Verification Required',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -68,9 +66,42 @@ async function sendAdminNotification(payment, booking) {
         <p style="color: #999; font-size: 12px;">Real Smart Limousine — Admin Panel</p>
       </div>
     `
-  };
+  });
 
-  await sgMail.send(msg);
+  if (!result.success) {
+    throw new Error(result.message || 'Admin payment notification email failed.');
+  }
+}
+
+/* =====================================================
+   CUSTOMER PAYMENT APPROVAL EMAIL
+===================================================== */
+async function sendPaymentApprovalEmail(email, name, bookingId, amount) {
+  const result = await sendEmail({
+    to: email,
+    subject: 'RSL — Payment Approved! Booking Confirmed',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0693E3;">Real Smart Limousine</h2>
+        <p>Hello <strong>${name}</strong>,</p>
+        <p>Great news! Your payment has been verified and your booking is confirmed.</p>
+
+        <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Booking ID:</strong> #${bookingId}</p>
+          <p><strong>Amount:</strong> PKR ${amount}</p>
+          <p><strong>Status:</strong> Confirmed</p>
+        </div>
+
+        <p>Your driver will contact you shortly. Thank you for choosing RSL.</p>
+        <hr/>
+        <p style="color: #999; font-size: 12px;">Real Smart Limousine — Luxury Ride Booking</p>
+      </div>
+    `
+  });
+
+  if (!result.success) {
+    throw new Error(result.message || 'Payment approval email failed.');
+  }
 }
 
 /* =====================================================
@@ -307,30 +338,13 @@ const approvePayment = async (req, res) => {
     });
 
     try {
-      const confirmMsg = {
-        to: payment.booking.email,
-        from: process.env.SENDGRID_FROM_EMAIL,
-        subject: 'RSL — Payment Approved! Booking Confirmed',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #0693E3;">Real Smart Limousine</h2>
-            <p>Hello <strong>${payment.booking.name}</strong>,</p>
-            <p>Great news! Your payment has been verified and your booking is confirmed.</p>
+      await sendPaymentApprovalEmail(
+        payment.booking.email,
+        payment.booking.name,
+        payment.booking_id,
+        payment.amount
+      );
 
-            <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Booking ID:</strong> #${payment.booking_id}</p>
-              <p><strong>Amount:</strong> PKR ${payment.amount}</p>
-              <p><strong>Status:</strong> Confirmed</p>
-            </div>
-
-            <p>Your driver will contact you shortly. Thank you for choosing RSL.</p>
-            <hr/>
-            <p style="color: #999; font-size: 12px;">Real Smart Limousine — Luxury Ride Booking</p>
-          </div>
-        `
-      };
-
-      await sgMail.send(confirmMsg);
       console.log('✅ Approval email sent to customer');
     } catch (emailError) {
       console.log('⚠️ Approval email error:', emailError.message);

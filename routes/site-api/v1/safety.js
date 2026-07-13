@@ -3,9 +3,7 @@ const router = express.Router();
 
 const SafetyAlert = require('../../../models/SafetyAlert');
 const DriverLocation = require('../../../models/driver_location');
-
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { sendEmail } = require('../../../helpers/sendEmail');
 
 /* =====================================================
    GET LATEST CAR / DRIVER LOCATION BY BOOKING
@@ -84,9 +82,8 @@ async function sendAdminEmail({
       title = 'Driver Misbehaviour Report';
     }
 
-    await sgMail.send({
+    const result = await sendEmail({
       to: process.env.ADMIN_ALERT_EMAIL,
-      from: process.env.SENDGRID_FROM_EMAIL,
       subject,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;padding:20px;border:2px solid ${color};border-radius:12px;">
@@ -153,6 +150,10 @@ async function sendAdminEmail({
         </div>
       `
     });
+
+    if (!result.success) {
+      throw new Error(result.message || 'Admin safety email failed.');
+    }
 
     console.log(`✅ ${type.toUpperCase()} admin email sent`);
 

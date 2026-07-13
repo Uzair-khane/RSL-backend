@@ -250,9 +250,14 @@ sequelize
   .sync()
   .then(() => {
     console.log("Table created.");
+
     var server = httpServer.listen(port, () => {
       console.log("Web Backend Server is running on port", server.address().port);
     });
+    console.log('SENDGRID key loaded:', process.env.SENDGRID_API_KEY ? 'YES' : 'NO');
+    console.log('SENDGRID key prefix:', process.env.SENDGRID_API_KEY ? process.env.SENDGRID_API_KEY.slice(0, 3) : 'missing');
+    console.log('SENDGRID from email:', process.env.SENDGRID_FROM_EMAIL);
+    console.log('ADMIN alert email:', process.env.ADMIN_ALERT_EMAIL);
   })
   .catch((err) => {
     console.log("An error occured while creating table: " + err);

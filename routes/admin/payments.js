@@ -3,9 +3,7 @@ const router = express.Router();
 
 const Payment = require('../../models/payment');
 const Bookings = require('../../models/booking');
-const sgMail = require('@sendgrid/mail');
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { sendEmail } = require('../../helpers/sendEmail');
 
 // PAGE — Payments List
 router.get('/list', async (req, res) => {
@@ -250,10 +248,9 @@ router.post('/approve/:id', async (req, res) => {
     }
 
     try {
-      if (payment.booking && payment.booking.email && process.env.SENDGRID_FROM_EMAIL) {
-        await sgMail.send({
+      if (payment.booking && payment.booking.email) {
+        const result = await sendEmail({
           to: payment.booking.email,
-          from: process.env.SENDGRID_FROM_EMAIL,
           subject: 'RSL — Payment Verified! Booking Confirmed',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
@@ -272,6 +269,12 @@ router.post('/approve/:id', async (req, res) => {
             </div>
           `
         });
+
+        if (!result.success) {
+          throw new Error(result.message || 'Verify email failed.');
+        }
+
+        console.log('✅ Verify payment email sent:', payment.booking.email);
       }
     } catch (emailError) {
       console.log('VERIFY EMAIL ERROR =>', emailError.message);
@@ -361,10 +364,9 @@ router.post('/cash-collected/:id', async (req, res) => {
     }
 
     try {
-      if (payment.booking && payment.booking.email && process.env.SENDGRID_FROM_EMAIL) {
-        await sgMail.send({
+      if (payment.booking && payment.booking.email) {
+        const result = await sendEmail({
           to: payment.booking.email,
-          from: process.env.SENDGRID_FROM_EMAIL,
           subject: 'RSL — Cash Payment Collected',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
@@ -383,6 +385,12 @@ router.post('/cash-collected/:id', async (req, res) => {
             </div>
           `
         });
+
+        if (!result.success) {
+          throw new Error(result.message || 'Cash collected email failed.');
+        }
+
+        console.log('✅ Cash collected email sent:', payment.booking.email);
       }
     } catch (emailError) {
       console.log('CASH EMAIL ERROR =>', emailError.message);

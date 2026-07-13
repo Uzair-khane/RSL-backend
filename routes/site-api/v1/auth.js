@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const sgMail = require('@sendgrid/mail');
 const User = require('../../../models/user');
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { sendEmail } = require('../../../helpers/sendEmail');
 
 // OTP generate karne ka function
 function generateOTP() {
@@ -14,9 +12,8 @@ function generateOTP() {
 
 // Email bhejna ka function
 async function sendOTPEmail(email, name, otp) {
-    const msg = {
+    const result = await sendEmail({
         to: email,
-        from: process.env.SENDGRID_FROM_EMAIL,
         subject: 'RSL — Your Verification Code',
         html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
@@ -32,8 +29,11 @@ async function sendOTPEmail(email, name, otp) {
             <p style="color: #999; font-size: 12px;">Real Smart Limousine — Luxury Ride Booking</p>
         </div>
         `
-    };
-    await sgMail.send(msg);
+    });
+
+    if (!result.success) {
+        throw new Error(result.message || 'OTP email failed.');
+    }
 }
 
 // REGISTER

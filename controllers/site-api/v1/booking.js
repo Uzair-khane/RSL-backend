@@ -2,9 +2,7 @@ const { Sequelize, Op, DataTypes } = require("sequelize");
 const Bookings = require("../../../models/booking");
 const Drivers_Cars = require("../../../models/drivers_cars");
 const Drivers = require("../../../models/driver");
-const sgMail = require("@sendgrid/mail");
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { sendEmail } = require("../../../helpers/sendEmail");
 
 const isParam = (param) => {
   return param !== undefined && param !== null && param !== "";
@@ -14,9 +12,8 @@ const isParam = (param) => {
    DRIVER EMAIL
 ===================================================== */
 async function sendDriverNotification(driverEmail, driverName, booking) {
-  const msg = {
+  const result = await sendEmail({
     to: driverEmail,
-    from: process.env.SENDGRID_FROM_EMAIL,
     subject: "RSL — New Booking Assigned",
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
@@ -40,18 +37,19 @@ async function sendDriverNotification(driverEmail, driverName, booking) {
         <p style="color:#999;font-size:12px;">RSL — Luxury Ride Booking</p>
       </div>
     `
-  };
+  });
 
-  await sgMail.send(msg);
+  if (!result.success) {
+    throw new Error(result.message || "Driver email failed.");
+  }
 }
 
 /* =====================================================
    PASSENGER TRACKING EMAIL
 ===================================================== */
 async function sendPassengerTrackingEmail(passengerEmail, passengerName, booking, trackingUrl) {
-  const msg = {
+  const result = await sendEmail({
     to: passengerEmail,
-    from: process.env.SENDGRID_FROM_EMAIL,
     subject: "RSL — Your Ride Tracking Link",
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;">
@@ -86,9 +84,11 @@ async function sendPassengerTrackingEmail(passengerEmail, passengerName, booking
         <p style="color:#999;font-size:12px;">RSL — Real Smart Limousine</p>
       </div>
     `
-  };
+  });
 
-  await sgMail.send(msg);
+  if (!result.success) {
+    throw new Error(result.message || "Passenger email failed.");
+  }
 }
 
 /* =====================================================
@@ -319,23 +319,23 @@ const bookingStatus = async (req, res) => {
     const driver =
       driverCar && driverCar.driver
         ? {
-            id: driverCar.driver.id,
-            name: driverCar.driver.name,
-            contact: driverCar.driver.contact,
-            email: driverCar.driver.email,
-            image: driverCar.driver.image,
-            license_no: driverCar.driver.license_no,
-            id_card_no: driverCar.driver.id_card_no,
-            passport_no: driverCar.driver.passport_no,
-            address: driverCar.driver.address,
-            driver_status: driverCar.driver.driver_status,
-            rating: driverCar.driver.rating,
-            total_rides: driverCar.driver.total_rides,
-            experience_years: driverCar.driver.experience_years,
-            emergency_contact: driverCar.driver.emergency_contact,
-            verified_status: driverCar.driver.verified_status,
-            current_address: driverCar.driver.current_address
-          }
+          id: driverCar.driver.id,
+          name: driverCar.driver.name,
+          contact: driverCar.driver.contact,
+          email: driverCar.driver.email,
+          image: driverCar.driver.image,
+          license_no: driverCar.driver.license_no,
+          id_card_no: driverCar.driver.id_card_no,
+          passport_no: driverCar.driver.passport_no,
+          address: driverCar.driver.address,
+          driver_status: driverCar.driver.driver_status,
+          rating: driverCar.driver.rating,
+          total_rides: driverCar.driver.total_rides,
+          experience_years: driverCar.driver.experience_years,
+          emergency_contact: driverCar.driver.emergency_contact,
+          verified_status: driverCar.driver.verified_status,
+          current_address: driverCar.driver.current_address
+        }
         : null;
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
