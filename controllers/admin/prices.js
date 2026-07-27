@@ -54,8 +54,8 @@ const List = async (req, res) => {
       dataArr = [
         no,
         item.car.dataValues.title || "N/A",
-        item.km_price +" AED" || "N/A",
-        item.hourly_price +" AED" || "N/A",
+        item.km_price + " RS " || "N/A",
+        item.hourly_price + "RS" || "N/A",
         item.description?.substring(0, 80),
         `<span class="badge bg-default badge">${moment(item.createdAt).format(
           "ll"
@@ -87,17 +87,17 @@ const List = async (req, res) => {
 // Department Add Controller
 const Add = async (req, res) => {
   let { car, hourly_price, km_price, description } = req.body;
-  let alreadySetPrice = await Prices.findAll({ where: {car_id:car}});
-  if(alreadySetPrice){
+  let alreadySetPrice = await Prices.findAll({ where: { car_id: car } });
+  if (alreadySetPrice) {
     return res.send({
-      success:false,
-      message:"This Car prices is already existed"
+      success: false,
+      message: "This Car prices is already existed"
     });
   }
   await Prices.create({
     car_id: car,
     hourly_price: hourly_price,
-    km_price : km_price,
+    km_price: km_price,
     description: description,
   })
     .then((recordCreated) => {

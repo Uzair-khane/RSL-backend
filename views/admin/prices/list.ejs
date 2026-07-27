@@ -63,7 +63,7 @@
                               <div class="col-md-3 mb-2">
                                 <label for="km_price">Per KM Price(PKR)<sup class="text-danger">*</sup></label>
                                 <input type="text" class="form-control" name="km_price" id="km_price"
-                                placeholder="Enter Per KM Price(PKR)" required />
+                                  placeholder="Enter Per KM Price(PKR)" required />
                               </div>
                               <div class="col-md-5 mb-2">
                                 <label for="hourly_price">Hourly Price(PKR)<sup class="text-danger">*</sup></label>
@@ -123,7 +123,7 @@
                                 <label>Select Ride Type<small class="text-info"></small></label>
                                 <label for="km_price_edit">Per KM Price(PKR)<sup class="text-danger">*</sup></label>
                                 <input type="text" class="form-control" name="km_price_edit" id="km_price_edit"
-                                placeholder="Enter Per KM Price(PKR)" required />
+                                  placeholder="Enter Per KM Price(PKR)" required />
                               </div>
                               <div class="col-md-5 mb-2">
                                 <label for="hourly_price_edit">Hourly Price(PKR)<sup class="text-danger">*</sup></label>
@@ -171,7 +171,7 @@
                               <thead>
                                 <tr>
                                   <th style="width: 4%">#</th>
-                                  <th style="width: 15%">Title</th>                                 
+                                  <th style="width: 15%">Title</th>
                                   <th>Per Km Price</th>
                                   <th>Hourly Price</th>
                                   <th>Description</th>
@@ -180,7 +180,9 @@
                                   <th>Action</th>
                                 </tr>
                               </thead>
-                              <tbody></tbody>
+                              <tbody>
+
+                              </tbody>
                             </table>
                           </div>
                         </div>
@@ -240,12 +242,12 @@
     $(document).on("submit", "#addForm", async function (e) {
       e.preventDefault();
       let formData = new FormData();
-      const car = $("#car").val();     
+      const car = $("#car").val();
       const hourly_price = $("#hourly_price").val();
-      const km_price = $("#km_price").val();      
+      const km_price = $("#km_price").val();
       const description = $("#description").summernote("code");
 
-      formData.append("car", car);      
+      formData.append("car", car);
       formData.append("hourly_price", hourly_price);
       formData.append("km_price", km_price);
       formData.append("description", description);
@@ -295,7 +297,7 @@
             $("#km_price_edit").val(response.data.km_price);
             $("#hourly_price_edit").val(response.data.hourly_price);
 
-           
+
 
             $("#description_edit").summernote("code", response.data.description);
             // scroll top
@@ -313,7 +315,7 @@
       e.preventDefault();
       let formData = new FormData();
       const id = $("#prices_id_edit").val();
-      const car = $("#car_edit").val();      
+      const car = $("#car_edit").val();
       const hourly_price = $("#hourly_price_edit").val();
       const km_price = $("#km_price_edit").val();
       const description = $("#description_edit").summernote("code");
